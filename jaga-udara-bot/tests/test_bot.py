@@ -68,6 +68,28 @@ class TesPanduan(unittest.TestCase):
             telegram.kirim_dokumen, telegram.sematkan = asli
 
 
+class TesLogJadwal(unittest.TestCase):
+    def test_slot_dan_keterlambatan(self):
+        lama = main.LOG_JADWAL
+        main.LOG_JADWAL = os.path.join(tempfile.mkdtemp(), "log.csv")
+        env = {k: os.environ.get(k) for k in ("GITHUB_ACTIONS", "GITHUB_EVENT_NAME", "FIXTURES")}
+        os.environ.update(GITHUB_ACTIONS="true", GITHUB_EVENT_NAME="schedule")
+        os.environ.pop("FIXTURES", None)
+        try:
+            # 15.27 WIB -> slot 15.00, terlambat 27 menit
+            main._catat_jadwal(datetime(2026, 10, 10, 8, 27, tzinfo=timezone.utc), "harian", 3)
+            with open(main.LOG_JADWAL, encoding="utf-8") as f:
+                isi = f.read().splitlines()
+            self.assertEqual(isi[1], "2026-10-10 15.27,jadwal,2026-10-10 15.00,27,harian,3")
+        finally:
+            main.LOG_JADWAL = lama
+            for k, v in env.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+
+
 class TesUjung(unittest.TestCase):
     def test_jalan_dengan_data_contoh(self):
         # arsip uji ditulis ke folder sementara, supaya tidak tercampur dengan arsip asli
