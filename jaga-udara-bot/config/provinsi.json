@@ -1,0 +1,83 @@
+{
+  "_catatan": "Daftar provinsi yang dipantau. 'aktif': false = belum dikirim. 'chat_env' = nama secret GitHub berisi ID kanal Telegram provinsi itu.",
+  "panduan_url": "https://claude.ai/artifact/V93jfCmqsGocTdrZWWCoKY",
+  "radius_kota_km": 50,
+  "provinsi": [
+    {
+      "id": "kalteng",
+      "nama": "Kalimantan Tengah",
+      "kode_bps": "62",
+      "aktif": true,
+      "chat_env": "TELEGRAM_CHAT_KALTENG",
+      "kota": [
+        {"nama": "Palangka Raya", "lat": -2.2096, "lon": 113.9139},
+        {"nama": "Sampit", "lat": -2.5328, "lon": 112.9500},
+        {"nama": "Pangkalan Bun", "lat": -2.6833, "lon": 111.6167},
+        {"nama": "Kuala Kapuas", "lat": -3.0016, "lon": 114.3843},
+        {"nama": "Buntok", "lat": -1.7167, "lon": 114.8500},
+        {"nama": "Muara Teweh", "lat": -0.9500, "lon": 114.8833}
+      ]
+    },
+    {
+      "id": "kalbar",
+      "nama": "Kalimantan Barat",
+      "kode_bps": "61",
+      "aktif": false,
+      "chat_env": "TELEGRAM_CHAT_KALBAR",
+      "kota": [
+        {"nama": "Pontianak", "lat": -0.0263, "lon": 109.3425},
+        {"nama": "Ketapang", "lat": -1.8536, "lon": 109.9711},
+        {"nama": "Sintang", "lat": 0.0697, "lon": 111.4950},
+        {"nama": "Singkawang", "lat": 0.9060, "lon": 108.9846}
+      ]
+    },
+    {
+      "id": "kalsel",
+      "nama": "Kalimantan Selatan",
+      "kode_bps": "63",
+      "aktif": false,
+      "chat_env": "TELEGRAM_CHAT_KALSEL",
+      "kota": [
+        {"nama": "Banjarmasin", "lat": -3.3194, "lon": 114.5908},
+        {"nama": "Banjarbaru", "lat": -3.4572, "lon": 114.8100},
+        {"nama": "Barabai", "lat": -2.5833, "lon": 115.3833}
+      ]
+    },
+    {
+      "id": "riau",
+      "nama": "Riau",
+      "kode_bps": "14",
+      "aktif": false,
+      "chat_env": "TELEGRAM_CHAT_RIAU",
+      "kota": [
+        {"nama": "Pekanbaru", "lat": 0.5071, "lon": 101.4478},
+        {"nama": "Dumai", "lat": 1.6667, "lon": 101.4500},
+        {"nama": "Rengat", "lat": -0.3800, "lon": 102.5400}
+      ]
+    },
+    {
+      "id": "jambi",
+      "nama": "Jambi",
+      "kode_bps": "15",
+      "aktif": false,
+      "chat_env": "TELEGRAM_CHAT_JAMBI",
+      "kota": [
+        {"nama": "Kota Jambi", "lat": -1.6101, "lon": 103.6131},
+        {"nama": "Muara Bungo", "lat": -1.4667, "lon": 102.1167},
+        {"nama": "Muara Tebo", "lat": -1.4833, "lon": 102.4500}
+      ]
+    },
+    {
+      "id": "sumsel",
+      "nama": "Sumatera Selatan",
+      "kode_bps": "16",
+      "aktif": false,
+      "chat_env": "TELEGRAM_CHAT_SUMSEL",
+      "kota": [
+        {"nama": "Palembang", "lat": -2.9761, "lon": 104.7754},
+        {"nama": "Kayu Agung", "lat": -3.3936, "lon": 104.8389},
+        {"nama": "Prabumulih", "lat": -3.4328, "lon": 104.2353}
+      ]
+    }
+  ]
+}
