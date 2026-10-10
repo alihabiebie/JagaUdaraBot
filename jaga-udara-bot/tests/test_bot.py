@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 AKAR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, AKAR)
-from bot import analisis, pesan  # noqa: E402
+from bot import analisis, main, pesan, telegram  # noqa: E402
 
 
 class TesAnalisis(unittest.TestCase):
@@ -39,6 +39,31 @@ class TesAnalisis(unittest.TestCase):
     def test_tren(self):
         self.assertTrue(pesan.tren(100, 40).startswith("naik"))
         self.assertTrue(pesan.tren(10, 60).startswith("turun"))
+
+
+class TesPanduan(unittest.TestCase):
+    def test_pesan_tanpa_tautan_artifact(self):
+        hasil = {"nama": "Kalimantan Tengah", "waktu": datetime(2026, 10, 10, 23, tzinfo=timezone.utc), "tingkat": 0,
+                 "titik_prov_24j": 0, "titik_prov_24j_sebelumnya": 0, "kota": []}
+        tg = pesan.harian(hasil, 50)
+        self.assertNotIn("claude.ai", tg)
+        self.assertIn("PDF", tg)
+        self.assertNotIn("PDF", pesan.harian(hasil, 50, wa=True))  # Saluran WhatsApp tidak memuat PDF
+
+    def test_pdf_dikirim_sekali(self):
+        kirim, pin = [], []
+        asli = telegram.kirim_dokumen, telegram.sematkan
+        telegram.kirim_dokumen = lambda *a: kirim.append(a) or 42
+        telegram.sematkan = lambda *a: pin.append(a)
+        try:
+            pdf = os.path.join(AKAR, "docs", "panduan-asap-keluarga.pdf")
+            prov = {"id": "uji", "nama": "Uji"}
+            sha = main._kirim_panduan("t", "@c", pdf, "", prov)
+            self.assertEqual((len(kirim), len(pin)), (1, 1))
+            self.assertEqual(main._kirim_panduan("t", "@c", pdf, sha, prov), sha)
+            self.assertEqual(len(kirim), 1)  # tidak dikirim ulang kalau isinya sama
+        finally:
+            telegram.kirim_dokumen, telegram.sematkan = asli
 
 
 class TesUjung(unittest.TestCase):

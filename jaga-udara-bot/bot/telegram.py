@@ -1,6 +1,7 @@
 """Mengirim pesan dan foto ke kanal Telegram lewat Bot API (gratis)."""
 import json
 import mimetypes
+import os
 import urllib.error
 import urllib.request
 import uuid
@@ -30,16 +31,33 @@ def kirim_teks(token, chat_id, teks):
         _post(f"https://api.telegram.org/bot{token}/sendMessage", body, {"Content-Type": "application/json"})
 
 
-def kirim_foto(token, chat_id, path, keterangan):
+def _kirim_file(token, metode, kolom, chat_id, path, keterangan, nama_file, tipe_bawaan):
     batas = uuid.uuid4().hex
     with open(path, "rb") as f:
         isi = f.read()
-    tipe = mimetypes.guess_type(path)[0] or "image/png"
+    tipe = mimetypes.guess_type(path)[0] or tipe_bawaan
     bagian = []
     for k, v in (("chat_id", str(chat_id)), ("caption", keterangan[:1000])):
         bagian.append(f"--{batas}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n".encode())
-    bagian.append(f"--{batas}\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"kartu.png\"\r\n"
+    bagian.append(f"--{batas}\r\nContent-Disposition: form-data; name=\"{kolom}\"; filename=\"{nama_file}\"\r\n"
                   f"Content-Type: {tipe}\r\n\r\n".encode() + isi + b"\r\n")
     bagian.append(f"--{batas}--\r\n".encode())
-    _post(f"https://api.telegram.org/bot{token}/sendPhoto", b"".join(bagian),
-          {"Content-Type": f"multipart/form-data; boundary={batas}"})
+    return _post(f"https://api.telegram.org/bot{token}/{metode}", b"".join(bagian),
+                 {"Content-Type": f"multipart/form-data; boundary={batas}"})
+
+
+def kirim_foto(token, chat_id, path, keterangan):
+    _kirim_file(token, "sendPhoto", "photo", chat_id, path, keterangan, "kartu.png", "image/png")
+
+
+def kirim_dokumen(token, chat_id, path, keterangan):
+    """Mengirim file (misalnya PDF panduan). Mengembalikan message_id."""
+    hasil = _kirim_file(token, "sendDocument", "document", chat_id, path, keterangan,
+                        os.path.basename(path), "application/octet-stream")
+    return hasil["result"]["message_id"]
+
+
+def sematkan(token, chat_id, message_id):
+    """Menyematkan (pin) pesan. Di kanal, bot perlu izin admin untuk menyematkan/mengedit pesan."""
+    body = json.dumps({"chat_id": chat_id, "message_id": message_id, "disable_notification": True}).encode()
+    _post(f"https://api.telegram.org/bot{token}/pinChatMessage", body, {"Content-Type": "application/json"})

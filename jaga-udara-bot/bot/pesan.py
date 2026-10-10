@@ -19,6 +19,10 @@ CATATAN = ("Titik api dari satelit NASA (bisa terlewat kalau tertutup awan atau 
            "Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. "
            "Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah.")
 
+# PDF panduan dikirim dan disematkan sekali di kanal Telegram (lihat main.py).
+# Saluran WhatsApp tidak bisa memuat file PDF, jadi baris ini hanya untuk Telegram.
+PANDUAN = "📄 Panduan bergambar: buka file PDF yang disematkan (pinned) di bagian atas kanal ini."
+
 
 def tanggal(dt):
     d = dt.astimezone(WIB)
@@ -61,7 +65,7 @@ def _baris_kota(k, sekarang, wa=False):
     return bagian[0] + "\n   " + "; ".join(rinci)
 
 
-def harian(hasil, panduan_url, radius_km, wa=False):
+def harian(hasil, radius_km, wa=False):
     s = hasil["waktu"]
     e = (lambda x: x) if wa else html.escape
     b = (lambda x: f"*{x}*") if wa else (lambda x: f"<b>{x}</b>")
@@ -76,11 +80,14 @@ def harian(hasil, panduan_url, radius_km, wa=False):
         b(f"Per kota (titik api dalam {radius_km} km):"),
     ]
     baris += [_baris_kota(k, s, wa) for k in hasil["kota"]]
-    baris += ["", b("Yang perlu dilakukan:"), TINDAKAN[t], "", f"Panduan bergambar: {panduan_url}", "", ("_" + CATATAN + "_") if wa else f"<i>{html.escape(CATATAN)}</i>"]
+    baris += ["", b("Yang perlu dilakukan:"), TINDAKAN[t]]
+    if not wa:
+        baris += ["", PANDUAN]
+    baris += ["", ("_" + CATATAN + "_") if wa else f"<i>{html.escape(CATATAN)}</i>"]
     return "\n".join(baris)
 
 
-def peringatan(hasil, naik, panduan_url, wa=False):
+def peringatan(hasil, naik, wa=False):
     """naik = list (nama_kota, tingkat_lama, tingkat_baru)."""
     s = hasil["waktu"]
     b = (lambda x: f"*{x}*") if wa else (lambda x: f"<b>{x}</b>")
@@ -92,7 +99,9 @@ def peringatan(hasil, naik, panduan_url, wa=False):
         alasan = ", ".join(k["alasan"]) or "kondisi memburuk"
         baris.append(f"{IKON[baru]} {b(e(nama))} naik ke {b(TINGKAT[baru])} (sebelumnya {TINGKAT[lama]})")
         baris.append(f"   Penyebab: {e(alasan)}")
-    baris += ["", b("Yang perlu dilakukan:"), TINDAKAN[tmax], "", f"Panduan bergambar: {panduan_url}"]
+    baris += ["", b("Yang perlu dilakukan:"), TINDAKAN[tmax]]
+    if not wa:
+        baris += ["", PANDUAN]
     return "\n".join(baris)
 
 
