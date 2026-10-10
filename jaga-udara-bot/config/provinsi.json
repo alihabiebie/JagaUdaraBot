@@ -11,36 +11,66 @@
       "chat_env": "TELEGRAM_CHAT_KALTENG",
       "kota": [
         {"nama": "Palangka Raya", "lat": -2.2096, "lon": 113.9139},
-        {"nama": "Sampit", "lat": -2.5328, "lon": 112.9500},
+        {"nama": "Sampit", "lat": -2.5328, "lon": 112.95},
         {"nama": "Pangkalan Bun", "lat": -2.6833, "lon": 111.6167},
         {"nama": "Kuala Kapuas", "lat": -3.0016, "lon": 114.3843},
-        {"nama": "Buntok", "lat": -1.7167, "lon": 114.8500},
-        {"nama": "Muara Teweh", "lat": -0.9500, "lon": 114.8833}
+        {"nama": "Buntok", "lat": -1.7167, "lon": 114.85},
+        {"nama": "Muara Teweh", "lat": -0.95, "lon": 114.8833}
       ]
     },
     {
       "id": "kalbar",
       "nama": "Kalimantan Barat",
       "kode_bps": "61",
-      "aktif": false,
+      "aktif": true,
       "chat_env": "TELEGRAM_CHAT_KALBAR",
       "kota": [
         {"nama": "Pontianak", "lat": -0.0263, "lon": 109.3425},
+        {"nama": "Singkawang", "lat": 0.906, "lon": 108.9846},
         {"nama": "Ketapang", "lat": -1.8536, "lon": 109.9711},
-        {"nama": "Sintang", "lat": 0.0697, "lon": 111.4950},
-        {"nama": "Singkawang", "lat": 0.9060, "lon": 108.9846}
+        {"nama": "Sintang", "lat": 0.0697, "lon": 111.495},
+        {"nama": "Putussibau", "lat": 0.8333, "lon": 112.9333}
       ]
     },
     {
       "id": "kalsel",
       "nama": "Kalimantan Selatan",
       "kode_bps": "63",
-      "aktif": false,
+      "aktif": true,
       "chat_env": "TELEGRAM_CHAT_KALSEL",
       "kota": [
         {"nama": "Banjarmasin", "lat": -3.3194, "lon": 114.5908},
-        {"nama": "Banjarbaru", "lat": -3.4572, "lon": 114.8100},
-        {"nama": "Barabai", "lat": -2.5833, "lon": 115.3833}
+        {"nama": "Banjarbaru", "lat": -3.4572, "lon": 114.81},
+        {"nama": "Barabai", "lat": -2.5833, "lon": 115.3833},
+        {"nama": "Tanjung", "lat": -2.1667, "lon": 115.3833},
+        {"nama": "Kotabaru", "lat": -3.2833, "lon": 116.1667}
+      ]
+    },
+    {
+      "id": "kaltim",
+      "nama": "Kalimantan Timur",
+      "kode_bps": "64",
+      "aktif": true,
+      "chat_env": "TELEGRAM_CHAT_KALTIM",
+      "kota": [
+        {"nama": "Samarinda", "lat": -0.5022, "lon": 117.1536},
+        {"nama": "Balikpapan", "lat": -1.2654, "lon": 116.8312},
+        {"nama": "Bontang", "lat": 0.1333, "lon": 117.5},
+        {"nama": "Tanah Grogot", "lat": -1.9097, "lon": 116.1972},
+        {"nama": "Sendawar", "lat": -0.2333, "lon": 115.7}
+      ]
+    },
+    {
+      "id": "kaltara",
+      "nama": "Kalimantan Utara",
+      "kode_bps": "65",
+      "aktif": true,
+      "chat_env": "TELEGRAM_CHAT_KALTARA",
+      "kota": [
+        {"nama": "Tanjung Selor", "lat": 2.8375, "lon": 117.3653},
+        {"nama": "Tarakan", "lat": 3.3, "lon": 117.6333},
+        {"nama": "Nunukan", "lat": 4.1333, "lon": 117.6667},
+        {"nama": "Malinau", "lat": 3.5833, "lon": 116.6333}
       ]
     },
     {
@@ -51,8 +81,8 @@
       "chat_env": "TELEGRAM_CHAT_RIAU",
       "kota": [
         {"nama": "Pekanbaru", "lat": 0.5071, "lon": 101.4478},
-        {"nama": "Dumai", "lat": 1.6667, "lon": 101.4500},
-        {"nama": "Rengat", "lat": -0.3800, "lon": 102.5400}
+        {"nama": "Dumai", "lat": 1.6667, "lon": 101.45},
+        {"nama": "Rengat", "lat": -0.38, "lon": 102.54}
       ]
     },
     {
@@ -64,7 +94,7 @@
       "kota": [
         {"nama": "Kota Jambi", "lat": -1.6101, "lon": 103.6131},
         {"nama": "Muara Bungo", "lat": -1.4667, "lon": 102.1167},
-        {"nama": "Muara Tebo", "lat": -1.4833, "lon": 102.4500}
+        {"nama": "Muara Tebo", "lat": -1.4833, "lon": 102.45}
       ]
     },
     {
