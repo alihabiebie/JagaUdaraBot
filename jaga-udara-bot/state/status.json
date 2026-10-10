@@ -1,12 +1,12 @@
 {
   "kalteng": {
-    "waktu": "2026-10-10T14:12:10.119272+00:00",
+    "waktu": "2026-10-10T20:27:38.875260+00:00",
     "tingkat": 3,
-    "titik_prov_24j": 1173,
+    "titik_prov_24j": 1292,
     "kota": {
       "Sampit": 3,
-      "Palangka Raya": 3,
       "Kuala Kapuas": 3,
+      "Palangka Raya": 3,
       "Pangkalan Bun": 3,
       "Buntok": 3,
       "Muara Teweh": 2
@@ -14,22 +14,22 @@
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f"
   },
   "kalbar": {
-    "waktu": "2026-10-10T14:12:10.119272+00:00",
+    "waktu": "2026-10-10T20:27:38.875260+00:00",
     "tingkat": 3,
-    "titik_prov_24j": 212,
+    "titik_prov_24j": 184,
     "kota": {
-      "Pontianak": 3,
+      "Sintang": 3,
       "Ketapang": 2,
-      "Sintang": 2,
+      "Pontianak": 2,
       "Singkawang": 1,
       "Putussibau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f"
   },
   "kalsel": {
-    "waktu": "2026-10-10T14:12:10.119272+00:00",
+    "waktu": "2026-10-10T20:27:38.875260+00:00",
     "tingkat": 3,
-    "titik_prov_24j": 308,
+    "titik_prov_24j": 386,
     "kota": {
       "Banjarmasin": 3,
       "Banjarbaru": 2,
@@ -40,20 +40,20 @@
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f"
   },
   "kaltim": {
-    "waktu": "2026-10-10T14:12:10.119272+00:00",
+    "waktu": "2026-10-10T20:27:38.875260+00:00",
     "tingkat": 2,
-    "titik_prov_24j": 111,
+    "titik_prov_24j": 118,
     "kota": {
       "Tanah Grogot": 2,
-      "Samarinda": 1,
+      "Samarinda": 2,
       "Balikpapan": 1,
-      "Sendawar": 1,
-      "Bontang": 1
+      "Bontang": 1,
+      "Sendawar": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f"
   },
   "kaltara": {
-    "waktu": "2026-10-10T14:12:10.119272+00:00",
+    "waktu": "2026-10-10T20:27:38.875260+00:00",
     "tingkat": 1,
     "titik_prov_24j": 5,
     "kota": {
