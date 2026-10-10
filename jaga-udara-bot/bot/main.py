@@ -22,7 +22,9 @@ from datetime import datetime, timezone
 from . import analisis, kartu, pesan, sumber, telegram
 
 AKAR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-JAM_HARIAN_WIB = (5, 6, 7)  # ringkasan dikirim pada putaran yang jatuh di jam ini
+# Ringkasan + PDF dikirim tiap 3 jam pada putaran yang jatuh di jam 06.00-23.59 WIB
+# (jadwal 06, 09, 12, 15, 18, 21). Putaran 00 dan 03 hanya mengirim kalau status naik.
+JAM_HARIAN_WIB = range(6, 24)
 
 
 def _baca_json(path, bawaan):
@@ -39,10 +41,12 @@ def _tulis_json(path, data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-def _kirim_panduan(token, chat, path, sha_lama, prov):
-    """Kirim PDF panduan ke kanal lalu sematkan, hanya kalau belum pernah dikirim atau isinya berubah.
+def _kirim_panduan(token, chat, path, sha_lama, prov, selalu=False):
+    """Kirim PDF panduan ke kanal.
 
-    Mengembalikan sha PDF yang sudah terkirim (sha lama kalau gagal, supaya dicoba lagi di putaran berikutnya).
+    selalu=True: dikirim bersama setiap pesan. Selain itu hanya kalau belum pernah dikirim atau isinya berubah.
+    PDF disematkan (pin) hanya kalau isinya baru, supaya kanal tidak penuh sematan yang sama.
+    Mengembalikan sha PDF yang sudah disematkan (sha lama kalau gagal, supaya dicoba lagi di putaran berikutnya).
     """
     try:
         with open(path, "rb") as f:
@@ -50,7 +54,8 @@ def _kirim_panduan(token, chat, path, sha_lama, prov):
     except FileNotFoundError:
         print(f"[{prov['id']}] PDF panduan tidak ditemukan: {path}")
         return sha_lama
-    if sha == sha_lama:
+    baru = sha != sha_lama
+    if not (baru or selalu):
         return sha_lama
     try:
         mid = telegram.kirim_dokumen(token, chat, path, f"📄 Panduan keluarga menghadapi kabut asap ({prov['nama']}). "
@@ -58,11 +63,13 @@ def _kirim_panduan(token, chat, path, sha_lama, prov):
     except telegram.GagalKirim as e:
         print(f"[{prov['id']}] GAGAL kirim PDF panduan: {e}")
         return sha_lama
+    print(f"[{prov['id']}] PDF panduan dikirim ke kanal")
+    if not baru:
+        return sha_lama
     try:
         telegram.sematkan(token, chat, mid)
     except telegram.GagalKirim as e:
         print(f"[{prov['id']}] PDF panduan terkirim, tapi gagal disematkan (beri bot izin admin 'Pin/Edit messages'): {e}")
-    print(f"[{prov['id']}] PDF panduan dikirim ke kanal")
     return sha
 
 
@@ -145,8 +152,6 @@ def jalankan(mode="otomatis", coba=False, sekarang=None):
         chat = os.environ.get(prov.get("chat_env", ""), "")
         panduan_lama = status.get(prov["id"], {}).get("panduan_sha", "")
         panduan_sha = panduan_lama
-        if panduan_pdf and not coba and tg_token and chat:
-            panduan_sha = _kirim_panduan(tg_token, chat, panduan_pdf, panduan_lama, prov)
         if kirim and not coba:
             if not (tg_token and chat):
                 print(f"[{prov['id']}] TELEGRAM_BOT_TOKEN atau {prov.get('chat_env')} belum diisi, pesan tidak dikirim")
@@ -160,6 +165,9 @@ def jalankan(mode="otomatis", coba=False, sekarang=None):
                 except telegram.GagalKirim as e:
                     print(f"[{prov['id']}] GAGAL kirim: {e}")
                     galat += 1
+        # PDF panduan ikut setiap pesan; tanpa pesan pun tetap dikirim kalau isinya baru
+        if panduan_pdf and not coba and tg_token and chat:
+            panduan_sha = _kirim_panduan(tg_token, chat, panduan_pdf, panduan_lama, prov, selalu=bool(kirim))
 
         status[prov["id"]] = {
             "waktu": sekarang.isoformat(),
