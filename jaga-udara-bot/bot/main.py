@@ -93,7 +93,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None):
 
         # arsip
         cap = sekarang.astimezone(analisis.WIB)
-        folder = os.path.join(AKAR, "arsip", f"{cap:%Y}", f"{cap:%m}")
+        folder = os.path.join(os.environ.get("ARSIP_DIR") or os.path.join(AKAR, "arsip"), f"{cap:%Y}", f"{cap:%m}")
         os.makedirs(folder, exist_ok=True)
         dasar = os.path.join(folder, f"{cap:%d-%H%M}-{prov['id']}")
         png = kartu.buat(hasil, geom, [x for x in batas["features"] if x is not f], dasar + ".png", radius)

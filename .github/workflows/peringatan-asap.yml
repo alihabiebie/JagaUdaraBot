@@ -69,4 +69,6 @@ jobs:
           mkdir -p arsip state
           git add arsip state
           git diff --cached --quiet || git commit -m "Arsip $(TZ=Asia/Jakarta date '+%Y-%m-%d %H.%M') WIB"
+          # ambil perubahan terbaru dulu (misalnya kalau Anda mengedit file saat bot berjalan)
+          git pull --rebase --autostash || true
           git push || echo "Push gagal (mungkin bentrok), akan dicoba di putaran berikutnya"

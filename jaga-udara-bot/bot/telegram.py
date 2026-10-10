@@ -1,6 +1,7 @@
 """Mengirim pesan dan foto ke kanal Telegram lewat Bot API (gratis)."""
 import json
 import mimetypes
+import urllib.error
 import urllib.request
 import uuid
 

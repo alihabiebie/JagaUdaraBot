@@ -3,6 +3,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
 
@@ -42,8 +43,10 @@ class TesAnalisis(unittest.TestCase):
 
 class TesUjung(unittest.TestCase):
     def test_jalan_dengan_data_contoh(self):
+        # arsip uji ditulis ke folder sementara, supaya tidak tercampur dengan arsip asli
+        arsip = tempfile.mkdtemp()
         env = dict(os.environ, FIXTURES=os.path.join(AKAR, "tests", "fixtures"),
-                   WAKTU_UJI="2026-10-10T23:00:00+00:00")
+                   WAKTU_UJI="2026-10-10T23:00:00+00:00", ARSIP_DIR=arsip)
         r = subprocess.run([sys.executable, "-m", "bot.main", "--coba"], cwd=AKAR, env=env,
                            capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)

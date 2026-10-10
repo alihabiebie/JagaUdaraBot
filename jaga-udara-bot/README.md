@@ -41,6 +41,8 @@ Status kota = tingkat **tertinggi** dari tiga penilaian berikut.
 ### 1. Repo GitHub
 Buat repo baru (Public, supaya GitHub Actions gratis), lalu unggah seluruh isi folder ini.
 
+File jadwal harus ada tepat di `.github/workflows/peringatan-asap.yml` di akar repo (bukan di dalam folder `jaga-udara-bot/`). Nama folder tidak boleh mengandung spasi: `.github` dan `workflows`, bukan `.github ` atau ` workflows `. Kalau ada spasi, tab Actions tetap menampilkan "Get started".
+
 ### 2. Kunci data NASA FIRMS (gratis)
 Buka https://firms.modaps.eosdis.nasa.gov/api/map_key/ , masukkan email, lalu salin MAP_KEY yang dikirim.
 
@@ -61,7 +63,7 @@ Buka repo, lalu **Settings > Secrets and variables > Actions > New repository se
 
 ### 5. Coba jalankan
 Buka tab **Actions > Peringatan asap > Run workflow**:
-- isi `coba` = `ya` untuk uji tanpa mengirim (hasilnya ada di folder `arsip/`)
+- isi `coba` = `ya` untuk uji tanpa mengirim (hasilnya ada di folder `jaga-udara-bot/arsip/`)
 - isi `mode` = `harian` untuk langsung mengirim ringkasan ke kanal
 
 Setelah itu bot berjalan sendiri sesuai jadwal.
