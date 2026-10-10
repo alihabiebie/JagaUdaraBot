@@ -1,6 +1,6 @@
 {
   "kalteng": {
-    "waktu": "2026-10-10T07:26:32.243182+00:00",
+    "waktu": "2026-10-10T07:36:31.626665+00:00",
     "tingkat": 3,
     "titik_prov_24j": 947,
     "kota": {
@@ -10,6 +10,7 @@
       "Pangkalan Bun": 3,
       "Buntok": 3,
       "Muara Teweh": 2
-    }
+    },
+    "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f"
   }
 }
