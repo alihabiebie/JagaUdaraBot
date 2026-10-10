@@ -49,7 +49,7 @@ Buka https://firms.modaps.eosdis.nasa.gov/api/map_key/ , masukkan email, lalu sa
 ### 3. Bot dan kanal Telegram
 1. Di Telegram, buka **@BotFather**, kirim `/newbot`, beri nama (misalnya "Jaga Udara Bot"), lalu salin **token**-nya.
 2. Buat **kanal** baru (New Channel), misalnya `Jaga Udara – Kalteng`, jenis Public, dengan alamat misalnya `@jagaudara_kalteng`.
-3. Tambahkan bot sebagai **admin** kanal itu, dengan izin "Post messages".
+3. Tambahkan bot sebagai **admin** kanal itu, dengan izin "Post messages" dan "Edit messages of others" (perlu untuk menyematkan PDF panduan).
 
 ### 4. Simpan rahasia di GitHub
 Buka repo, lalu **Settings > Secrets and variables > Actions > New repository secret**:
@@ -67,6 +67,14 @@ Buka tab **Actions > Peringatan asap > Run workflow**:
 - isi `mode` = `harian` untuk langsung mengirim ringkasan ke kanal
 
 Setelah itu bot berjalan sendiri sesuai jadwal.
+
+## PDF panduan bergambar
+
+Bot mengirim `docs/panduan-asap-keluarga.pdf` ke tiap kanal satu kali, lalu menyematkannya (pin) di bagian atas kanal. Pesan harian dan peringatan menunjuk ke PDF yang disematkan itu. PDF hanya dikirim ulang kalau isinya berubah.
+
+Saluran WhatsApp tidak bisa memuat file PDF, jadi teks untuk WhatsApp tidak menyebut panduan. Bagikan PDF-nya langsung ke grup WhatsApp kalau perlu.
+
+Untuk mengubah isi panduan: edit `docs/panduan/panduan-asap-keluarga.html`, lalu buat ulang PDF-nya dari folder `docs/panduan` dengan `node buat-pdf.js` (perlu Node.js dan `npm i playwright`).
 
 ## Menambah provinsi
 

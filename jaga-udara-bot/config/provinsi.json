@@ -1,6 +1,6 @@
 {
   "_catatan": "Daftar provinsi yang dipantau. 'aktif': false = belum dikirim. 'chat_env' = nama secret GitHub berisi ID kanal Telegram provinsi itu.",
-  "panduan_url": "https://claude.ai/artifact/V93jfCmqsGocTdrZWWCoKY",
+  "panduan_pdf": "docs/panduan-asap-keluarga.pdf",
   "radius_kota_km": 50,
   "provinsi": [
     {

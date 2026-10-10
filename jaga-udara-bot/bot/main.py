@@ -13,6 +13,7 @@ Variabel lingkungan (di GitHub: Settings > Secrets and variables > Actions):
     WAQI_TOKEN             opsional, token gratis dari https://aqicn.org/data-platform/token/
 """
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -38,6 +39,33 @@ def _tulis_json(path, data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def _kirim_panduan(token, chat, path, sha_lama, prov):
+    """Kirim PDF panduan ke kanal lalu sematkan, hanya kalau belum pernah dikirim atau isinya berubah.
+
+    Mengembalikan sha PDF yang sudah terkirim (sha lama kalau gagal, supaya dicoba lagi di putaran berikutnya).
+    """
+    try:
+        with open(path, "rb") as f:
+            sha = hashlib.sha256(f.read()).hexdigest()
+    except FileNotFoundError:
+        print(f"[{prov['id']}] PDF panduan tidak ditemukan: {path}")
+        return sha_lama
+    if sha == sha_lama:
+        return sha_lama
+    try:
+        mid = telegram.kirim_dokumen(token, chat, path, f"📄 Panduan keluarga menghadapi kabut asap ({prov['nama']}). "
+                                     "Simpan dan teruskan ke keluarga. Bisa dicetak untuk ditempel atau dibacakan.")
+    except telegram.GagalKirim as e:
+        print(f"[{prov['id']}] GAGAL kirim PDF panduan: {e}")
+        return sha_lama
+    try:
+        telegram.sematkan(token, chat, mid)
+    except telegram.GagalKirim as e:
+        print(f"[{prov['id']}] PDF panduan terkirim, tapi gagal disematkan (beri bot izin admin 'Pin/Edit messages'): {e}")
+    print(f"[{prov['id']}] PDF panduan dikirim ke kanal")
+    return sha
+
+
 def jalankan(mode="otomatis", coba=False, sekarang=None):
     sekarang = sekarang or datetime.now(timezone.utc)
     if os.environ.get("WAKTU_UJI"):
@@ -52,7 +80,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None):
     tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
     waqi = os.environ.get("WAQI_TOKEN", "")
     radius = cfg.get("radius_kota_km", 50)
-    panduan = cfg.get("panduan_url", "")
+    panduan_pdf = os.path.join(AKAR, cfg["panduan_pdf"]) if cfg.get("panduan_pdf") else ""
 
     jam_wib = sekarang.astimezone(analisis.WIB).hour
     if mode == "otomatis":
@@ -98,8 +126,8 @@ def jalankan(mode="otomatis", coba=False, sekarang=None):
         dasar = os.path.join(folder, f"{cap:%d-%H%M}-{prov['id']}")
         png = kartu.buat(hasil, geom, [x for x in batas["features"] if x is not f], dasar + ".png", radius)
         uji = "[CONTOH, DATA UJI]\n" if os.environ.get("FIXTURES") else ""
-        teks_tg = uji + pesan.harian(hasil, panduan, radius)
-        teks_wa = uji + pesan.harian(hasil, panduan, radius, wa=True)
+        teks_tg = uji + pesan.harian(hasil, radius)
+        teks_wa = uji + pesan.harian(hasil, radius, wa=True)
         with open(dasar + "-whatsapp.txt", "w", encoding="utf-8") as fh:
             fh.write(teks_wa)
         with open(dasar + "-telegram.html", "w", encoding="utf-8") as fh:
@@ -109,12 +137,16 @@ def jalankan(mode="otomatis", coba=False, sekarang=None):
         if mode == "harian":
             kirim = [("foto", png, pesan.keterangan_foto(hasil)), ("teks", teks_tg)]
         elif naik:
-            teks_al = uji + pesan.peringatan(hasil, naik, panduan)
+            teks_al = uji + pesan.peringatan(hasil, naik)
             with open(dasar + "-peringatan-whatsapp.txt", "w", encoding="utf-8") as fh:
-                fh.write(uji + pesan.peringatan(hasil, naik, panduan, wa=True))
+                fh.write(uji + pesan.peringatan(hasil, naik, wa=True))
             kirim = [("teks", teks_al), ("foto", png, pesan.keterangan_foto(hasil))]
 
         chat = os.environ.get(prov.get("chat_env", ""), "")
+        panduan_lama = status.get(prov["id"], {}).get("panduan_sha", "")
+        panduan_sha = panduan_lama
+        if panduan_pdf and not coba and tg_token and chat:
+            panduan_sha = _kirim_panduan(tg_token, chat, panduan_pdf, panduan_lama, prov)
         if kirim and not coba:
             if not (tg_token and chat):
                 print(f"[{prov['id']}] TELEGRAM_BOT_TOKEN atau {prov.get('chat_env')} belum diisi, pesan tidak dikirim")
@@ -134,6 +166,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None):
             "tingkat": hasil["tingkat"],
             "titik_prov_24j": hasil["titik_prov_24j"],
             "kota": {k["nama"]: k["tingkat"] for k in hasil["kota"]},
+            "panduan_sha": panduan_sha,
         }
         ringkasan.append(f"[{prov['id']}] {analisis.TINGKAT[hasil['tingkat']]}, {hasil['titik_prov_24j']} titik api, "
                          f"mode {mode}, {'kirim ' + str(len(kirim)) + ' pesan' if kirim else 'tidak ada pesan'}"
