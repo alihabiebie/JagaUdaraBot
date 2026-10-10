@@ -59,10 +59,12 @@ Buka repo, lalu **Settings > Secrets and variables > Actions > New repository se
 | `FIRMS_MAP_KEY` | kunci dari langkah 2 |
 | `TELEGRAM_BOT_TOKEN` | token dari @BotFather |
 | `TELEGRAM_CHAT_KALTENG` | alamat kanal, misalnya `@jagaudara_kalteng` |
+| `TELEGRAM_CHAT_KALBAR`, `TELEGRAM_CHAT_KALSEL`, `TELEGRAM_CHAT_KALTIM`, `TELEGRAM_CHAT_KALTARA` | alamat kanal provinsi lain, dengan bot sebagai admin |
 | `WAQI_TOKEN` | opsional, token WAQI |
 
 ### 5. Coba jalankan
 Buka tab **Actions > Peringatan asap > Run workflow**:
+- isi `provinsi` (mis. `kalbar,kalsel`) untuk menjalankan provinsi tertentu saja; kosongkan untuk semua
 - isi `coba` = `ya` untuk uji tanpa mengirim (hasilnya ada di folder `jaga-udara-bot/arsip/`)
 - isi `mode` = `harian` untuk langsung mengirim ringkasan ke kanal
 

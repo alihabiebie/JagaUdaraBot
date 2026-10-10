@@ -96,10 +96,11 @@ class TesUjung(unittest.TestCase):
         arsip = tempfile.mkdtemp()
         env = dict(os.environ, FIXTURES=os.path.join(AKAR, "tests", "fixtures"),
                    WAKTU_UJI="2026-10-10T23:00:00+00:00", ARSIP_DIR=arsip)
-        r = subprocess.run([sys.executable, "-m", "bot.main", "--coba"], cwd=AKAR, env=env,
+        r = subprocess.run([sys.executable, "-m", "bot.main", "--coba", "--provinsi", "kalteng"], cwd=AKAR, env=env,
                            capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("[kalteng]", r.stdout)
+        self.assertNotIn("[kalbar]", r.stdout)  # --provinsi membatasi provinsi yang dijalankan
 
 
 if __name__ == "__main__":

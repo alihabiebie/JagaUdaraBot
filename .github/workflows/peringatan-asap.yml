@@ -17,6 +17,10 @@ on:
         description: "Isi 'ya' untuk uji coba tanpa mengirim pesan"
         required: false
         default: "tidak"
+      provinsi:
+        description: "Kosongkan untuk semua provinsi, atau isi mis. kalbar,kalsel,kaltim,kaltara"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -54,13 +58,17 @@ jobs:
           TELEGRAM_CHAT_KALTENG: ${{ secrets.TELEGRAM_CHAT_KALTENG }}
           TELEGRAM_CHAT_KALBAR: ${{ secrets.TELEGRAM_CHAT_KALBAR }}
           TELEGRAM_CHAT_KALSEL: ${{ secrets.TELEGRAM_CHAT_KALSEL }}
+          TELEGRAM_CHAT_KALTIM: ${{ secrets.TELEGRAM_CHAT_KALTIM }}
+          TELEGRAM_CHAT_KALTARA: ${{ secrets.TELEGRAM_CHAT_KALTARA }}
           TELEGRAM_CHAT_RIAU: ${{ secrets.TELEGRAM_CHAT_RIAU }}
           TELEGRAM_CHAT_JAMBI: ${{ secrets.TELEGRAM_CHAT_JAMBI }}
           TELEGRAM_CHAT_SUMSEL: ${{ secrets.TELEGRAM_CHAT_SUMSEL }}
           WAQI_TOKEN: ${{ secrets.WAQI_TOKEN }}
+          PROVINSI: ${{ github.event.inputs.provinsi }}
         run: |
           ARGS="--mode ${{ github.event.inputs.mode || 'otomatis' }}"
           if [ "${{ github.event.inputs.coba }}" = "ya" ]; then ARGS="$ARGS --coba"; fi
+          if [ -n "$PROVINSI" ]; then ARGS="$ARGS --provinsi $PROVINSI"; fi
           python -m bot.main $ARGS
 
       - name: Simpan arsip dan status ke repo

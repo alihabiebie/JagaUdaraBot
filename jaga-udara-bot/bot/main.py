@@ -107,7 +107,7 @@ def _kirim_panduan(token, chat, path, sha_lama, prov, selalu=False):
     return sha
 
 
-def jalankan(mode="otomatis", coba=False, sekarang=None):
+def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
     mulai = datetime.now(timezone.utc)
     sekarang = sekarang or mulai
     if os.environ.get("WAKTU_UJI"):
@@ -133,6 +133,8 @@ def jalankan(mode="otomatis", coba=False, sekarang=None):
     terkirim = 0
     for prov in cfg.get("provinsi", []):
         if not prov.get("aktif"):
+            continue
+        if hanya and prov["id"] not in hanya:
             continue
         f = fitur.get(prov["kode_bps"])
         if not f:
@@ -228,8 +230,10 @@ def main():
     ap = argparse.ArgumentParser(description="Bot Peringatan Asap Jaga Udara")
     ap.add_argument("--mode", choices=["otomatis", "harian", "cek"], default="otomatis")
     ap.add_argument("--coba", action="store_true", help="jangan kirim apa pun, hanya buat file arsip")
+    ap.add_argument("--provinsi", default="", help="hanya provinsi ini, dipisah koma (mis. kalbar,kalsel). Kosong = semua yang aktif")
     a = ap.parse_args()
-    sys.exit(jalankan(a.mode, a.coba))
+    hanya = {x.strip().lower() for x in a.provinsi.split(",") if x.strip()} or None
+    sys.exit(jalankan(a.mode, a.coba, hanya=hanya))
 
 
 if __name__ == "__main__":
