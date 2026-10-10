@@ -19,9 +19,9 @@ CATATAN = ("Titik api dari satelit NASA (bisa terlewat kalau tertutup awan atau 
            "Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. "
            "Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah.")
 
-# PDF panduan dikirim dan disematkan sekali di kanal Telegram (lihat main.py).
+# PDF panduan dikirim ke kanal Telegram tepat setelah setiap pesan (lihat main.py).
 # Saluran WhatsApp tidak bisa memuat file PDF, jadi baris ini hanya untuk Telegram.
-PANDUAN = "📄 Panduan bergambar: buka file PDF yang disematkan (pinned) di bagian atas kanal ini."
+PANDUAN = "📄 Panduan bergambar: buka file PDF di bawah pesan ini (juga disematkan di bagian atas kanal)."
 
 
 def tanggal(dt):

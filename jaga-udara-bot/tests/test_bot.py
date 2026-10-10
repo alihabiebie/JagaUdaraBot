@@ -50,7 +50,7 @@ class TesPanduan(unittest.TestCase):
         self.assertIn("PDF", tg)
         self.assertNotIn("PDF", pesan.harian(hasil, 50, wa=True))  # Saluran WhatsApp tidak memuat PDF
 
-    def test_pdf_dikirim_sekali(self):
+    def test_pdf_ikut_pesan_disematkan_sekali(self):
         kirim, pin = [], []
         asli = telegram.kirim_dokumen, telegram.sematkan
         telegram.kirim_dokumen = lambda *a: kirim.append(a) or 42
@@ -61,7 +61,9 @@ class TesPanduan(unittest.TestCase):
             sha = main._kirim_panduan("t", "@c", pdf, "", prov)
             self.assertEqual((len(kirim), len(pin)), (1, 1))
             self.assertEqual(main._kirim_panduan("t", "@c", pdf, sha, prov), sha)
-            self.assertEqual(len(kirim), 1)  # tidak dikirim ulang kalau isinya sama
+            self.assertEqual(len(kirim), 1)  # tanpa pesan: tidak dikirim ulang kalau isinya sama
+            main._kirim_panduan("t", "@c", pdf, sha, prov, selalu=True)
+            self.assertEqual((len(kirim), len(pin)), (2, 1))  # ikut pesan, tapi tidak disematkan ulang
         finally:
             telegram.kirim_dokumen, telegram.sematkan = asli
 

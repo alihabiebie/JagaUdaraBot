@@ -8,7 +8,7 @@ Inisiatif warga, bukan kanal resmi pemerintah. Biaya: Rp 0.
 
 ## Apa yang dikerjakan bot
 
-Setiap 6 jam (06.00, 12.00, 18.00, 00.00 WIB) bot:
+Setiap 3 jam mulai 06.00 WIB (06.00, 09.00, 12.00, 15.00, 18.00, 21.00, 00.00, 03.00) bot:
 
 1. **Mengambil data**
    - Titik api 3 hari terakhir dari satelit VIIRS (NASA FIRMS)
@@ -16,8 +16,8 @@ Setiap 6 jam (06.00, 12.00, 18.00, 00.00 WIB) bot:
    - Angka stasiun pemantau terdekat (WAQI), kalau token diisi
 2. **Menentukan status tiap kota**: AMAN, WASPADA, SIAGA, atau BAHAYA (aturannya di bawah)
 3. **Mengirim**
-   - Pukul 06.00 WIB: ringkasan harian (gambar kartu + pesan) ke kanal Telegram
-   - Putaran lain: hanya mengirim peringatan kalau ada kota yang naik ke SIAGA atau BAHAYA
+   - Pukul 06.00, 09.00, 12.00, 15.00, 18.00, dan 21.00 WIB: ringkasan (gambar kartu + pesan + PDF panduan) ke kanal Telegram
+   - Pukul 00.00 dan 03.00 WIB: hanya mengirim peringatan (+ PDF) kalau ada kota yang naik ke SIAGA atau BAHAYA, supaya warga tidak terbangun tiap 3 jam
 4. **Menyimpan** gambar, teks Telegram, dan teks WhatsApp di folder `arsip/`, serta status terakhir di `state/status.json`
 
 Contoh pesan: [harian](docs/contoh/pesan-harian-whatsapp.txt), [peringatan](docs/contoh/pesan-peringatan-whatsapp.txt). Semua contoh di folder `docs/contoh/` memakai **data uji buatan**, bukan data asli.
@@ -70,7 +70,7 @@ Setelah itu bot berjalan sendiri sesuai jadwal.
 
 ## PDF panduan bergambar
 
-Bot mengirim `docs/panduan-asap-keluarga.pdf` ke tiap kanal satu kali, lalu menyematkannya (pin) di bagian atas kanal. Pesan harian dan peringatan menunjuk ke PDF yang disematkan itu. PDF hanya dikirim ulang kalau isinya berubah.
+Bot mengirim `docs/panduan-asap-keluarga.pdf` tepat setelah setiap pesan. PDF juga disematkan (pin) di bagian atas kanal, tapi hanya sekali, dan disematkan ulang kalau isinya berubah.
 
 Saluran WhatsApp tidak bisa memuat file PDF, jadi teks untuk WhatsApp tidak menyebut panduan. Bagikan PDF-nya langsung ke grup WhatsApp kalau perlu.
 
