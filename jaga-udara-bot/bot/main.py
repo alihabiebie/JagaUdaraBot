@@ -13,11 +13,12 @@ Variabel lingkungan (di GitHub: Settings > Secrets and variables > Actions):
     WAQI_TOKEN             opsional, token gratis dari https://aqicn.org/data-platform/token/
 """
 import argparse
+import csv
 import hashlib
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from . import analisis, kartu, pesan, sumber, telegram
 
@@ -39,6 +40,39 @@ def _tulis_json(path, data):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+LOG_JADWAL = os.path.join(AKAR, "state", "log-jadwal.csv")
+KOLOM_LOG = ["mulai_wib", "pemicu", "slot_wib", "terlambat_menit", "mode", "pesan_terkirim"]
+
+
+def _catat_jadwal(mulai, mode, terkirim):
+    """Catat jam bot benar-benar mulai dibanding slot jadwalnya (06.00, 09.00, ... WIB).
+
+    Hanya di GitHub Actions dan bukan saat uji, supaya log berisi jadwal asli.
+    Dari log ini terlihat seberapa terlambat jadwal otomatis GitHub.
+    """
+    if os.environ.get("GITHUB_ACTIONS") != "true" or os.environ.get("FIXTURES"):
+        return
+    wib = mulai.astimezone(analisis.WIB)
+    slot = wib.replace(hour=wib.hour - wib.hour % 3, minute=0, second=0, microsecond=0)
+    pemicu = {"schedule": "jadwal", "workflow_dispatch": "manual"}.get(os.environ.get("GITHUB_EVENT_NAME", ""), "lain")
+    baris = {
+        "mulai_wib": f"{wib:%Y-%m-%d %H.%M}",
+        "pemicu": pemicu,
+        # slot hanya bermakna untuk jalan terjadwal
+        "slot_wib": f"{slot:%Y-%m-%d %H.%M}" if pemicu == "jadwal" else "",
+        "terlambat_menit": int((wib - slot) / timedelta(minutes=1)) if pemicu == "jadwal" else "",
+        "mode": mode,
+        "pesan_terkirim": terkirim,
+    }
+    baru = not os.path.exists(LOG_JADWAL)
+    os.makedirs(os.path.dirname(LOG_JADWAL), exist_ok=True)
+    with open(LOG_JADWAL, "a", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=KOLOM_LOG)
+        if baru:
+            w.writeheader()
+        w.writerow(baris)
 
 
 def _kirim_panduan(token, chat, path, sha_lama, prov, selalu=False):
@@ -74,7 +108,8 @@ def _kirim_panduan(token, chat, path, sha_lama, prov, selalu=False):
 
 
 def jalankan(mode="otomatis", coba=False, sekarang=None):
-    sekarang = sekarang or datetime.now(timezone.utc)
+    mulai = datetime.now(timezone.utc)
+    sekarang = sekarang or mulai
     if os.environ.get("WAKTU_UJI"):
         sekarang = datetime.fromisoformat(os.environ["WAKTU_UJI"])
     cfg = _baca_json(os.path.join(AKAR, "config", "provinsi.json"), {})
@@ -95,6 +130,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None):
 
     ringkasan = []
     galat = 0
+    terkirim = 0
     for prov in cfg.get("provinsi", []):
         if not prov.get("aktif"):
             continue
@@ -162,6 +198,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None):
                             telegram.kirim_foto(tg_token, chat, item[1], item[2])
                         else:
                             telegram.kirim_teks(tg_token, chat, item[1])
+                        terkirim += 1
                 except telegram.GagalKirim as e:
                     print(f"[{prov['id']}] GAGAL kirim: {e}")
                     galat += 1
@@ -182,6 +219,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None):
 
     if not coba:
         _tulis_json(status_path, status)
+    _catat_jadwal(mulai, mode + (" (coba)" if coba else ""), terkirim)
     print("\n".join(ringkasan) or "Tidak ada provinsi aktif.")
     return 1 if galat else 0
 

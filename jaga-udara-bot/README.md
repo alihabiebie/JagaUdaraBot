@@ -96,7 +96,7 @@ Dengan data asli: isi variabel `FIRMS_MAP_KEY` (dan lainnya), lalu `python -m bo
 - **Satelit:** satelit VIIRS lewat beberapa kali sehari dengan jeda data sekitar 3 jam. Titik api bisa terlewat kalau tertutup awan atau asap tebal, dan satu titik api belum tentu kebakaran.
 - **Prakiraan:** model CAMS beresolusi sekitar 45 km dan bisa jauh lebih rendah dari kenyataan saat kebakaran gambut. Pakai untuk melihat tren.
 - **Hitungan per kota:** titik api di sekitar kota dihitung dalam lingkaran 50 km, termasuk yang berada di provinsi tetangga.
-- **Jadwal GitHub:** bisa terlambat 5–30 menit. Bot menyimpan arsip setiap putaran supaya repo tetap aktif, karena jadwal otomatis berhenti kalau repo 60 hari tanpa perubahan.
+- **Jadwal GitHub:** bisa terlambat 5–30 menit, kadang lebih, dan sesekali terlewat. Setiap kali bot jalan, jam mulainya dicatat di `state/log-jadwal.csv` (slot jadwal, jam mulai sebenarnya, berapa menit terlambat, jumlah pesan terkirim). Pakai log itu untuk menentukan rentang jam yang diumumkan ke warga. Bot menyimpan arsip setiap putaran supaya repo tetap aktif, karena jadwal otomatis berhenti kalau repo 60 hari tanpa perubahan.
 - **Tanpa pengujian lapangan:** bot belum diuji dengan data asli karena dibuat di lingkungan tanpa akses ke NASA dan Open-Meteo. Lakukan langkah 5 dengan `coba = ya` dulu.
 
 ## Sumber data dan lisensi
