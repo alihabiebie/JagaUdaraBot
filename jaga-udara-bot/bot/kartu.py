@@ -78,8 +78,9 @@ def _panah_angin(ax, angin, xy, x0, y0, x1, y1):
         laju = math.hypot(p["u"], p["v"])
         if laju < 1:
             continue
-        # panah yang berlawanan dengan arah umum (lebih dari 60°) tidak digambar, supaya tidak membingungkan
-        if (p["u"] * angin["u"] + p["v"] * angin["v"]) / (laju * rata) < 0.5:
+        # hanya panah yang searah dengan arah utama (beda paling banyak 30°) yang digambar,
+        # supaya peta selalu sejalan dengan kalimat dan kompas di atasnya
+        if (p["u"] * angin["u"] + p["v"] * angin["v"]) / (laju * rata) < math.cos(math.radians(30)):
             continue
         panjang = 0.32 + 0.22 * min(laju / 20, 1)
         dx, dy = p["u"] / laju * panjang, p["v"] / laju * panjang
