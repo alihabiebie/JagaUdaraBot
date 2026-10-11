@@ -47,6 +47,18 @@ class TesAnalisis(unittest.TestCase):
         self.assertFalse(a["lemah"])
         self.assertIn("barat laut", pesan.kalimat_angin(a))
 
+    def test_arah_angin_delapan_arah(self):
+        # Open-Meteo memberi arah DATANG angin; kartu harus menyebut arah PERGI asap (kebalikannya)
+        now = datetime(2026, 10, 10, 23, tzinfo=timezone.utc)
+        jam = [f"2026-10-11T{h:02d}:00" for h in range(24)]
+        harapan = {0: "selatan", 45: "barat daya", 90: "barat", 135: "barat laut",
+                   180: "utara", 225: "timur laut", 270: "timur", 315: "tenggara"}
+        for dari, ke in harapan.items():
+            grid = {"lats": [0], "lons": [0], "titik": [{"lat": 0, "lon": 0, "waktu": jam,
+                                                          "laju": [12] * 24, "arah": [dari] * 24}]}
+            a = analisis.ringkas_angin(grid, now)
+            self.assertEqual(analisis.nama_arah(a["arah_ke"]), ke, f"angin dari {dari}°")
+
     def test_klaster(self):
         t = [{"lat": -2.0 + i * 0.001, "lon": 113.0} for i in range(30)] + \
             [{"lat": -3.0, "lon": 111.0 + i * 0.001} for i in range(20)] + [{"lat": 0.5, "lon": 115.0}]
