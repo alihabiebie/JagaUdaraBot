@@ -104,7 +104,7 @@ Di `config/provinsi.json`, ubah `"aktif": false` menjadi `true` untuk provinsi y
 ```bash
 pip install -r requirements.txt
 python tests/buat_fixture.py                  # buat data uji
-FIXTURES=tests/fixtures WAKTU_UJI=2026-10-10T23:00:00+00:00 python -m bot.main --coba
+FIXTURES=tests/fixtures WAKTU_UJI=2026-10-10T23:00:00+00:00 python -m bot.main --coba --provinsi kalteng
 python -m unittest discover tests             # uji dasar
 ```
 

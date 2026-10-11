@@ -124,6 +124,27 @@ class _Penempat:
         self.batas = (x0, y0, x1, y1)
         self.dpx = (x1 - x0) / (KANAN - KIRI)  # derajat per piksel (sumbu x dan y sama)
         self.kotak = []
+        # pusat sel titik panas: informasi utama peta, tidak boleh tertutup label/panah/kotak
+        self.api = np.empty((0, 2))
+        self.r_api = 0.0
+
+    def kena_api(self, k):
+        """Jumlah sel titik panas yang tertutup kotak k (barat, selatan, timur, utara)."""
+        if not len(self.api):
+            return 0
+        r = self.r_api
+        x, y = self.api[:, 0], self.api[:, 1]
+        return int(((x > k[0] - r) & (x < k[2] + r) & (y > k[1] - r) & (y < k[3] + r)).sum())
+
+    def api_dekat_garis(self, xa, ya, xb, yb, tambah):
+        """Apakah ada sel titik panas dalam jarak (r_api + tambah) dari ruas garis a-b."""
+        if not len(self.api):
+            return False
+        dx, dy = xb - xa, yb - ya
+        L2 = dx * dx + dy * dy or 1e-12
+        t = np.clip(((self.api[:, 0] - xa) * dx + (self.api[:, 1] - ya) * dy) / L2, 0, 1)
+        jx, jy = xa + t * dx - self.api[:, 0], ya + t * dy - self.api[:, 1]
+        return bool((np.hypot(jx, jy) < self.r_api + tambah).any())
 
     def ukuran(self, teks, pt, tebal="bold"):
         return (_lebar_px(self.kv, teks, pt, tebal) + 16) * self.dpx, (pt * 100 / 72 * 1.5) * self.dpx
@@ -143,16 +164,27 @@ class _Penempat:
     def tempatkan(self, x, y, teks, pt, jarak_px=18):
         """Kembalikan (x_teks, y_teks, ha) untuk label di sekitar titik (x, y)."""
         w, h = self.ukuran(teks, pt)
-        d = jarak_px * self.dpx
-        calon = [(x + d, y + d * 0.3, "left"), (x - d, y + d * 0.3, "right"),
-                 (x + d, y - d * 0.3 - h, "left"), (x - d, y - d * 0.3 - h, "right"),
-                 (x, y + d * 1.3, "center"), (x, y - d * 1.3 - h, "center")]
+        calon = []
+        # dekat dulu, lalu makin jauh kalau posisi dekat menutup titik panas
+        for jarak in (jarak_px, jarak_px * 2.2, jarak_px * 3.6):
+            d = jarak * self.dpx
+            calon += [(x + d, y + d * 0.3, "left"), (x - d, y + d * 0.3, "right"),
+                      (x + d, y - d * 0.3 - h, "left"), (x - d, y - d * 0.3 - h, "right"),
+                      (x, y + d * 1.3, "center"), (x, y - d * 1.3 - h, "center")]
+        terbaik = None
         for cx, cy, ha in calon:
             kx0 = cx if ha == "left" else cx - w if ha == "right" else cx - w / 2
             k = (kx0, cy, kx0 + w, cy + h)
             if self.bebas(k):
-                self.tambah(k)
-                return cx, cy + h / 2, ha
+                n = self.kena_api(k)
+                if terbaik is None or n < terbaik[0]:
+                    terbaik = (n, cx, cy, ha, k)
+                if n == 0:
+                    break
+        if terbaik:
+            _, cx, cy, ha, k = terbaik
+            self.tambah(k)
+            return cx, cy + h / 2, ha
         cx, cy, ha = calon[0]
         self.tambah((cx, cy, cx + w, cy + h))
         return cx, cy + h / 2, ha
@@ -231,7 +263,7 @@ def _tulis_asap(ax, pen, lo, la, zh, x0, y0, x1, y1):
             if zh[np.abs(la - cy).argmin(), np.abs(lo - cx).argmin()] < ASAP_BATAS[0]:
                 continue
             k = (cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2)
-            if pen.bebas(k):
+            if pen.bebas(k) and not pen.kena_api(k):
                 pen.tambah(k)
                 ax.text(cx, cy, "ASAP", fontsize=14, color="#4A3D2E", weight="bold", ha="center",
                         va="center", zorder=6, style="italic",
@@ -248,13 +280,6 @@ def _peta(fig, kv, hasil, geom_target, semua_fitur):
     _poligon(ax, geom_target, facecolor=DARAT, edgecolor="none", zorder=1)
 
     pen = _Penempat(kv, x0, y0, x1, y1)
-    # kotak arah asap (kanan atas), skala (kiri bawah), dan tanda utara (kiri atas) jangan ditimpa
-    pen.tambah((x1 - (BADGE_W + 26) * pen.dpx, y1 - (BADGE_H + 26) * pen.dpx, x1, y1))
-    pen.tambah((x0, y0, x0 + 230 * pen.dpx, y0 + 70 * pen.dpx))
-    pen.tambah((x0, y1 - 100 * pen.dpx, x0 + 64 * pen.dpx, y1))
-    for k in hasil["kota"]:
-        r = 18 * pen.dpx
-        pen.tambah((k["lon"] - r, k["lat"] - r, k["lon"] + r, k["lat"] + r))
 
     # 1. prakiraan asap (di bawah titik panas)
     asap = hasil.get("asap_grid")
@@ -285,12 +310,46 @@ def _peta(fig, kv, hasil, geom_target, semua_fitur):
         if len(c):
             hb.set_clim(1, max(4, float(np.percentile(c, 95))))
             hb.set_edgecolor("face")
+            pen.api = np.asarray(hb.get_offsets(), float).reshape(-1, 2)
+            pen.r_api = (x1 - x0) / nx * 0.55
+
+    # Kotak arah asap, skala, dan tanda utara ditaruh di pojok yang paling sedikit titik panasnya
+    # (dan tidak menutup kota). Urutan = pilihan utama kalau semua pojok sama-sama kosong.
+    def _pojok(nama, w_px, h_px):
+        w, h = w_px * pen.dpx, h_px * pen.dpx
+        kx = x1 - w if nama[1] == "ka" else x0
+        ky = y1 - h if nama[0] == "at" else y0
+        return (kx, ky, kx + w, ky + h)
+
+    def _skor_pojok(k):
+        kota_tertutup = sum(k[0] < c["lon"] < k[2] and k[1] < c["lat"] < k[3] for c in hasil["kota"])
+        return pen.kena_api(k) + 1000 * kota_tertutup
+
+    pojok = {}
+    sisa = [("at", "ka"), ("at", "ki"), ("ba", "ki"), ("ba", "ka")]
+    for nama, w_px, h_px, urutan in (
+            ("arah", BADGE_W + 26, BADGE_H + 26, [("at", "ka"), ("at", "ki"), ("ba", "ka"), ("ba", "ki")]),
+            ("skala", 230, 70, [("ba", "ki"), ("ba", "ka"), ("at", "ki"), ("at", "ka")]),
+            ("utara", 64, 100, [("at", "ki"), ("at", "ka"), ("ba", "ka"), ("ba", "ki")])):
+        pilih = min((p for p in urutan if p in sisa), key=lambda p: _skor_pojok(_pojok(p, w_px, h_px)))
+        sisa.remove(pilih)
+        pojok[nama] = pilih
+        pen.tambah(_pojok(pilih, w_px, h_px))
+    for k in hasil["kota"]:
+        r = 18 * pen.dpx
+        pen.tambah((k["lon"] - r, k["lat"] - r, k["lon"] + r, k["lat"] + r))
 
     # 3. kota
     for k in hasil["kota"]:
         fc, tc = _warna_kota(k)
         ukuran = [170, 210, 260, 320][k["tingkat"]]
-        ax.scatter([k["lon"]], [k["lat"]], s=ukuran, c=fc, edgecolors="white", linewidths=3, zorder=8)
+        r = 8 * pen.dpx
+        if pen.kena_api((k["lon"] - r, k["lat"] - r, k["lon"] + r, k["lat"] + r)):
+            # ada titik panas tepat di kota: cincin berwarna status, tengahnya kosong supaya titik panas terlihat
+            ax.scatter([k["lon"]], [k["lat"]], s=ukuran + 60, facecolors="none", edgecolors=fc, linewidths=4.5,
+                       zorder=8)
+        else:
+            ax.scatter([k["lon"]], [k["lat"]], s=ukuran, c=fc, edgecolors="white", linewidths=3, zorder=8)
         ax.scatter([k["lon"]], [k["lat"]], s=ukuran + 140, facecolors="none", edgecolors=INK, linewidths=1.1, zorder=7)
         tx, ty, ha = pen.tempatkan(k["lon"], k["lat"], k["nama"], 15)
         ax.text(tx, ty, k["nama"], ha=ha, va="center", fontsize=15, weight="bold", color=tc, zorder=9,
@@ -314,7 +373,8 @@ def _peta(fig, kv, hasil, geom_target, semua_fitur):
             return False
         return not any(_di_kotak(px, py, k) for g in garis for px, py in _titik_garis(*g))
 
-    calon = ((0, -0.4), (0, 0.4), (0.8, -0.4), (-0.8, -0.4), (0.8, 0.4), (-0.8, 0.4), (0, -0.75), (0, 0.75))
+    calon = ((0, -0.4), (0, 0.4), (0.8, -0.4), (-0.8, -0.4), (0.8, 0.4), (-0.8, 0.4), (0, -0.75), (0, 0.75),
+             (1.2, 0), (-1.2, 0), (1.2, -0.75), (-1.2, -0.75), (1.2, 0.75), (-1.2, 0.75), (0, -1.1), (0, 1.1))
     for kl in klaster:
         teks = f"±{angka(kl['n'])} titik panas"
         w, h = pen.ukuran(teks, 14)
@@ -323,17 +383,20 @@ def _peta(fig, kv, hasil, geom_target, semua_fitur):
             tx, ty = kl["lon"] + dx, kl["lat"] + dy
             k = (tx - w / 2, ty - h / 2, tx + w / 2, ty + h / 2)
             if pen.bebas(k):
-                posisi.append((_garis_rapi(kl["lon"], kl["lat"], tx, ty, k), tx, ty, k))
+                posisi.append((pen.kena_api(k), not _garis_rapi(kl["lon"], kl["lat"], tx, ty, k), len(posisi),
+                               tx, ty, k))
         if not posisi:
             continue
-        # utamakan posisi yang garisnya rapi; kalau tidak ada, pakai posisi bebas pertama
-        _, tx, ty, k = next((p for p in posisi if p[0]), posisi[0])
+        # utamakan posisi yang tidak menutup titik panas, lalu yang garisnya rapi, lalu yang paling dekat
+        *_, tx, ty, k = min(posisi)
         pen.tambah(k)
         # garis penunjuk di bawah semua label, supaya tidak menembus label pusat lain
         ax.plot([kl["lon"], tx], [kl["lat"], ty], color="#7A0F0F", lw=1.4, zorder=5.8)
         ax.text(tx, ty, teks, ha="center", va="center", fontsize=14, weight="bold", color="#7A0F0F",
                 zorder=6.6, bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="#C1121F", lw=1.2, alpha=0.95))
-        ax.scatter([kl["lon"]], [kl["lat"]], s=46, c="white", edgecolors="#7A0F0F", linewidths=2.2, zorder=6.5)
+        # lingkaran kosong supaya sel titik panas di bawahnya tetap terlihat
+        ax.scatter([kl["lon"]], [kl["lat"]], s=90, facecolors="none", edgecolors="#7A0F0F", linewidths=2.2,
+                   zorder=6.5)
         garis.append((kl["lon"], kl["lat"], tx, ty))
 
     if ada_asap_buruk:
@@ -353,6 +416,9 @@ def _peta(fig, kv, hasil, geom_target, semua_fitur):
             if laju < 1:
                 continue
             panjang = 0.26 + 0.28 * min(laju / 20, 1)  # derajat
+            ux, vy = p["u"] / laju * panjang / 2, p["v"] / laju * panjang / 2
+            if pen.api_dekat_garis(p["lon"] - ux, p["lat"] - vy, p["lon"] + ux, p["lat"] + vy, 0.08):
+                continue  # panah tidak boleh menutup titik panas
             xs.append(p["lon"])
             ys.append(p["lat"])
             us.append(p["u"] / laju * panjang)
@@ -364,16 +430,18 @@ def _peta(fig, kv, hasil, geom_target, semua_fitur):
                       edgecolor="white", linewidth=1.1, zorder=5, pivot="middle")
 
     # 6. skala km dan arah utara
-    lat_skala = y0 + 35 * pen.dpx
+    bx0, by0, _, _ = _pojok(pojok["skala"], 230, 70)
+    lat_skala = by0 + 35 * pen.dpx
     km_per_derajat = 111.32 * math.cos(math.radians(lat_skala))
     panjang_km = 100
-    sx = x0 + 22 * pen.dpx
+    sx = bx0 + 22 * pen.dpx
     lebar_skala = panjang_km / km_per_derajat
-    ax.add_patch(Rectangle((x0, y0), 230 * pen.dpx, 70 * pen.dpx, fc="white", ec="none", alpha=0.85, zorder=9))
+    ax.add_patch(Rectangle((bx0, by0), 230 * pen.dpx, 70 * pen.dpx, fc="white", ec="none", alpha=0.85, zorder=9))
     ax.plot([sx, sx + lebar_skala], [lat_skala, lat_skala], color=INK, lw=5, solid_capstyle="butt", zorder=10)
     ax.text(sx + lebar_skala + 10 * pen.dpx, lat_skala, f"{panjang_km} km", fontsize=14, color=INK, va="center",
             weight="bold", zorder=10)
-    ux, uy = x0 + 34 * pen.dpx, y1 - 70 * pen.dpx
+    nx0, _, _, ny1 = _pojok(pojok["utara"], 64, 100)
+    ux, uy = nx0 + 34 * pen.dpx, ny1 - 70 * pen.dpx
     ax.annotate("U", xy=(ux, uy + 44 * pen.dpx), xytext=(ux, uy), ha="center", va="center", fontsize=15,
                 weight="bold", color=INK, zorder=10,
                 arrowprops=dict(arrowstyle="-|>", color=INK, lw=2.2),
@@ -387,14 +455,15 @@ def _peta(fig, kv, hasil, geom_target, semua_fitur):
     for s in ax.spines.values():
         s.set_edgecolor(GARIS_LAIN)
         s.set_linewidth(1.2)
-    return {"asap_ada": zh is not None, "asap_buruk": ada_asap_buruk, "panah": ada_panah}
+    return {"asap_ada": zh is not None, "asap_buruk": ada_asap_buruk, "panah": ada_panah, "pojok_arah": pojok["arah"]}
 
 
-def _penunjuk_angin(kv, hasil):
-    """Kotak di pojok kanan atas peta: ke mana asap terbawa."""
+def _penunjuk_angin(kv, hasil, pojok=("at", "ka")):
+    """Kotak di pojok peta (biasanya kanan atas): ke mana asap terbawa."""
     angin = hasil.get("angin")
     w, h = BADGE_W, BADGE_H
-    x, y = KANAN - w - 12, PETA_ATAS + 12
+    x = KANAN - w - 12 if pojok[1] == "ka" else KIRI + 12
+    y = PETA_ATAS + 12 if pojok[0] == "at" else PETA_BAWAH - h - 12
     tepi = ANGIN if angin else ABU_DATA
     kv.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0,rounding_size=14",
                                 fc="white", ec=tepi, lw=1.8, alpha=0.96, zorder=20))
@@ -444,8 +513,12 @@ def _keterangan(kv, hasil, info):
         kv.add_patch(FancyArrow(x, y2, 82, 0, width=5, head_width=16, head_length=14,
                                 length_includes_head=True, fc=ANGIN, ec="white", lw=0.8))
         teks, warna, xt = f"Arah angin {angin['jam']} jam ke depan. Asap ikut terbawa ke arah panah.", INK, tx
-    elif angin:
+    elif angin and angin["lemah"]:
         teks, warna, xt = "Angin lemah: tidak ada panah angin, asap lambat menyebar.", INK, x
+    elif angin and angin["berubah"]:
+        teks, warna, xt = "Arah angin berubah-ubah: asap bisa menyebar ke segala arah.", INK, x
+    elif angin:
+        teks, warna, xt = "Arah angin: lihat kotak \"Asap terbawa ke\" di peta.", INK, x
     else:
         teks, warna, xt = "Arah angin: data belum tersedia saat ini.", MUTED, x
     kv.text(xt, y2, teks, fontsize=_pas(kv, teks, pt, "normal", KANAN - 16 - xt, 13), color=warna, va="center")
@@ -526,7 +599,7 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
     atas.set_ylim(TINGGI, 0)
     atas.axis("off")
     atas.patch.set_alpha(0)
-    _penunjuk_angin(atas, hasil)
+    _penunjuk_angin(atas, hasil, info["pojok_arah"])
     _keterangan(kv, hasil, info)
     _daftar_kota(kv, hasil, status_lama)
     _kaki(kv)

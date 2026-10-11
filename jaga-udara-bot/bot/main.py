@@ -195,7 +195,10 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
             continue
         geom = f["geometry"]
         try:
-            titik = sumber.titik_api(analisis.bbox_wilayah(geom), map_key)
+            # ambil titik panas seluas peta di kartu (lebih lebar dari provinsi), supaya tidak terpotong garis lurus
+            b1, b2 = analisis.bbox_wilayah(geom), kartu.batas_peta(geom)
+            titik = sumber.titik_api((min(b1[0], b2[0]), min(b1[1], b2[1]), max(b1[2], b2[2]), max(b1[3], b2[3])),
+                                     map_key)
         except sumber.GagalAmbil as e:
             print(f"[{prov['id']}] GAGAL ambil titik panas: {e}")
             galat += 1
@@ -237,8 +240,13 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         folder = os.path.join(os.environ.get("ARSIP_DIR") or os.path.join(AKAR, "arsip"), f"{cap:%Y}", f"{cap:%m}")
         os.makedirs(folder, exist_ok=True)
         dasar = os.path.join(folder, f"{cap:%d-%H%M}-{prov['id']}")
-        png = kartu.buat(hasil, geom, [x for x in batas["features"] if x is not f], dasar + ".png", radius,
-                         status_lama=lama or None)
+        try:
+            png = kartu.buat(hasil, geom, [x for x in batas["features"] if x is not f], dasar + ".png", radius,
+                             status_lama=lama or None)
+        except Exception as e:  # kartu gagal dibuat: pesan teks tetap dikirim
+            print(f"[{prov['id']}] GAGAL membuat kartu, hanya teks yang dikirim: {e!r}")
+            png = None
+            galat += 1
         uji = "[CONTOH, DATA UJI]\n" if os.environ.get("FIXTURES") else ""
         teks_tg = uji + pesan.harian(hasil, radius)
         teks_wa = uji + pesan.harian(hasil, radius, wa=True)
@@ -249,12 +257,12 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
 
         kirim = []
         if mode == "harian":
-            kirim = [("foto", png, pesan.keterangan_foto(hasil)), ("teks", teks_tg)]
+            kirim = [("foto", png, pesan.keterangan_foto(hasil)), ("teks", teks_tg)] if png else [("teks", teks_tg)]
         elif naik:
             teks_al = uji + pesan.peringatan(hasil, naik)
             with open(dasar + "-peringatan-whatsapp.txt", "w", encoding="utf-8") as fh:
                 fh.write(uji + pesan.peringatan(hasil, naik, wa=True))
-            kirim = [("teks", teks_al), ("foto", png, pesan.keterangan_foto(hasil))]
+            kirim = [("teks", teks_al)] + ([("foto", png, pesan.keterangan_foto(hasil))] if png else [])
 
         chat = os.environ.get(prov.get("chat_env", ""), "")
         panduan_lama = status.get(prov["id"], {}).get("panduan_sha", "")
@@ -288,6 +296,8 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
             # slot ditandai selesai hanya kalau semua pesan terkirim, supaya pemicu cadangan bisa mengulang
             "slot": slot if (otomatis and not coba and not gagal_kirim) else slot_lama,
         }
+        if not coba:
+            _tulis_json(status_path, status)  # simpan tiap provinsi, supaya yang sudah terkirim tidak dikirim ulang
         ringkasan.append(f"[{prov['id']}] {analisis.TINGKAT[hasil['tingkat']]}, {hasil['titik_prov_24j']} titik panas, "
                          f"mode {mode}, {'kirim ' + str(len(kirim)) + ' pesan' if kirim else 'tidak ada pesan'}"
                          f"{' (uji coba, tidak dikirim)' if coba and kirim else ''} -> {os.path.relpath(dasar, AKAR)}")
