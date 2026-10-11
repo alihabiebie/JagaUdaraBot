@@ -1,4 +1,4 @@
-"""Membuat gambar kartu harian (PNG 1080 x 1350) untuk Telegram dan WhatsApp.
+"""Membuat gambar kartu harian (PNG lebar 1080, tinggi mengikuti bentuk provinsi) untuk Telegram dan WhatsApp.
 
 Peta sengaja sederhana: setiap titik panas digambar sebagai titik merah, ditambah kota dan
 arah angin. Titik panas adalah informasi utama, jadi tidak ada yang boleh menutupinya:
@@ -24,11 +24,23 @@ INK, MUTED, BG, LAND, LAND_LAIN, GARIS = "#14201F", "#4D5E5A", "#FBFCFA", "#E4EC
 MERAH_TITIK = "#D2352F"
 ANGIN = "#2B5C8A"
 TAMBAH_PETA = 0.35  # derajat di sekeliling provinsi
+LEBAR = 1080
+PETA_ATAS = 310  # piksel dari atas
+PETA_LEBAR_MAKS, PETA_TINGGI_MAKS = 1020, 980
 
 
 def batas_peta(geom):
-    """Batas peta (barat, selatan, timur, utara). Dipakai juga main.py untuk data titik panas dan angin."""
-    return bbox_wilayah(geom, tambah=TAMBAH_PETA)
+    """Batas peta (barat, selatan, timur, utara). Dipakai juga main.py untuk data titik panas dan angin.
+
+    Provinsi yang bentuknya tinggi dilebarkan ke kiri-kanan (wilayah sekitarnya ikut tampil),
+    supaya peta selalu penuh selebar kartu.
+    """
+    x0, y0, x1, y1 = bbox_wilayah(geom, tambah=TAMBAH_PETA)
+    rasio_min = PETA_LEBAR_MAKS / PETA_TINGGI_MAKS
+    if (x1 - x0) / (y1 - y0) < rasio_min:
+        tambah = ((y1 - y0) * rasio_min - (x1 - x0)) / 2
+        x0, x1 = x0 - tambah, x1 + tambah
+    return x0, y0, x1, y1
 
 
 def _poligon(ax, geom, **kw):
@@ -95,10 +107,12 @@ def _label_kota(ax, fig, k, xy, terpakai):
                 bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.85))
 
 
-def _baris_angin(fig, hasil):
+
+
+def _baris_angin(fig, hasil, Y):
     """Satu baris di atas peta: ke mana asap terbawa angin, dengan kompas kecil."""
     angin = hasil.get("angin")
-    ax = fig.add_axes([0.05, 0.783, 0.05, 0.04])
+    ax = fig.add_axes([54 / LEBAR, Y(293), 54 / LEBAR, Y(239) - Y(293)])
     ax.set_xlim(-1, 1)
     ax.set_ylim(-1, 1)
     ax.set_aspect("equal")
@@ -113,31 +127,52 @@ def _baris_angin(fig, hasil):
         ax.text(0, 0, "~" if angin else "?", fontsize=20, color=ANGIN if angin else MUTED, ha="center",
                 va="center", weight="bold")
     teks = kalimat_angin(angin, hasil) or "Arah angin: data belum tersedia saat ini."
-    fig.text(0.112, 0.803, teks, fontsize=15 if len(teks) < 85 else 13.5, color=INK, va="center")
+    fig.text(121 / LEBAR, Y(266), teks, fontsize=15 if len(teks) < 85 else 13.5, color=INK, va="center")
 
 
 def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None):
     radius_km = radius_km or hasil.get("radius_km", 50)
-    fig = plt.figure(figsize=(10.8, 13.5), dpi=100, facecolor=BG)
     t = hasil["tingkat"]
 
+    # --- tata letak (piksel): peta selebar mungkin, tinggi kartu mengikuti bentuk provinsi
+    x0, y0, x1, y1 = batas_peta(geom_target)
+    rasio = (x1 - x0) / (y1 - y0)
+    peta_w = PETA_LEBAR_MAKS
+    peta_h = peta_w / rasio
+    if peta_h > PETA_TINGGI_MAKS:
+        peta_h = PETA_TINGGI_MAKS
+        peta_w = peta_h * rasio
+    peta_bawah = PETA_ATAS + peta_h
+    kota = hasil["kota"][:7]
+    daftar_atas = peta_bawah + 45
+    tinggi = int(daftar_atas + 61 + 57 * max(len(kota) - 1, 0) + 135)
+    W = LEBAR
+
+    def X(px):
+        return px / W
+
+    def Y(px):  # piksel dari atas -> pecahan figur dari bawah
+        return 1 - px / tinggi
+
+    fig = plt.figure(figsize=(W / 100, tinggi / 100), dpi=100, facecolor=BG)
+
     # --- judul
-    fig.text(0.05, 0.955, "Jaga Udara", fontsize=17, color=MUTED, weight="bold")
-    fig.text(0.05, 0.915, f"Kabar asap {hasil['nama']}", fontsize=34, color=INK, weight="bold")
-    fig.text(0.05, 0.885, tanggal(hasil["waktu"]), fontsize=17, color=MUTED)
-    chip = FancyBboxPatch((0.05, 0.835), 0.40, 0.038, boxstyle="round,pad=0.006,rounding_size=0.015",
+    fig.text(X(54), Y(61), "Jaga Udara", fontsize=17, color=MUTED, weight="bold")
+    fig.text(X(54), Y(115), f"Kabar asap {hasil['nama']}", fontsize=34, color=INK, weight="bold")
+    fig.text(X(54), Y(155), tanggal(hasil["waktu"]), fontsize=17, color=MUTED)
+    chip = FancyBboxPatch((X(54), Y(223)), X(432), Y(172) - Y(223), boxstyle="round,pad=0,rounding_size=0.012",
                           transform=fig.transFigure, facecolor=WARNA[t], edgecolor="none")
     fig.patches.append(chip)
-    fig.text(0.065, 0.846, f"Status provinsi: {TINGKAT[t]}", fontsize=19, color="white", weight="bold")
-    fig.text(0.50, 0.846, f"{hasil['titik_prov_24j']} titik panas dalam 24 jam "
+    fig.text(X(70), Y(198), f"Status provinsi: {TINGKAT[t]}", fontsize=19, color="white", weight="bold", va="center")
+    fig.text(X(540), Y(198), f"{hasil['titik_prov_24j']} titik panas dalam 24 jam "
              f"({tren(hasil['titik_prov_24j'], hasil['titik_prov_24j_sebelumnya'])})",
-             fontsize=16, color=INK)
-    _baris_angin(fig, hasil)
+             fontsize=16, color=INK, va="center")
+    _baris_angin(fig, hasil, Y)
 
     # --- peta
-    ax = fig.add_axes([0.05, 0.40, 0.90, 0.37])
+    kiri = (W - peta_w) / 2
+    ax = fig.add_axes([X(kiri), Y(peta_bawah), X(peta_w), Y(PETA_ATAS) - Y(peta_bawah)])
     ax.set_facecolor("#DCE8F6")
-    x0, y0, x1, y1 = batas_peta(geom_target)
     for f in semua_fitur:
         _poligon(ax, f["geometry"], facecolor=LAND_LAIN, edgecolor=GARIS, linewidth=0.8)
     _poligon(ax, geom_target, facecolor=LAND, edgecolor=INK, linewidth=1.6)
@@ -154,7 +189,7 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
     ada_panah = _panah_angin(ax, hasil.get("angin"), xy, x0, y0, x1, y1)
     if len(xy):
         # titik panas di atas panah dan batas wilayah, supaya tidak pernah tertutup
-        ax.scatter(xy[:, 0], xy[:, 1], s=10, c=MERAH_TITIK, alpha=0.75, linewidths=0, zorder=4)
+        ax.scatter(xy[:, 0], xy[:, 1], s=16, c=MERAH_TITIK, alpha=0.75, linewidths=0, zorder=4)
     for k in hasil["kota"]:
         ax.scatter([k["lon"]], [k["lat"]], s=230, c=WARNA[k["tingkat"]], edgecolors="white",
                    linewidths=2.5, zorder=5)
@@ -182,27 +217,29 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
         ax.legend(handles=tanda, loc=pojok[2], fontsize=12, frameon=True, framealpha=0.9)
 
     # --- daftar kota
-    y = 0.36
-    fig.text(0.05, y, f"Per kota (titik panas dalam {radius_km} km, 24 jam terakhir)", fontsize=16, color=MUTED,
-             weight="bold")
-    y -= 0.045
-    for k in hasil["kota"][:7]:
-        fig.patches.append(FancyBboxPatch((0.05, y - 0.006), 0.16, 0.032, boxstyle="round,pad=0.004,rounding_size=0.01",
+    y = daftar_atas
+    fig.text(X(54), Y(y), f"Per kota (titik panas dalam {radius_km} km, 24 jam terakhir)", fontsize=16,
+             color=MUTED, weight="bold", va="center")
+    y += 61
+    for k in kota:
+        fig.patches.append(FancyBboxPatch((X(54), Y(y + 21)), X(173), Y(y - 21) - Y(y + 21),
+                                          boxstyle="round,pad=0,rounding_size=0.008",
                                           transform=fig.transFigure, facecolor=WARNA[k["tingkat"]], edgecolor="none"))
-        fig.text(0.13, y + 0.004, TINGKAT[k["tingkat"]], fontsize=14, color="white", weight="bold", ha="center")
-        fig.text(0.235, y + 0.004, k["nama"], fontsize=17, color=INK, weight="bold")
+        fig.text(X(140), Y(y), TINGKAT[k["tingkat"]], fontsize=14, color="white", weight="bold", ha="center",
+                 va="center")
+        fig.text(X(254), Y(y), k["nama"], fontsize=17, color=INK, weight="bold", va="center")
         info = f"{k['titik_24j']} titik panas"
         if k["ispu_prakiraan"] is not None:
             info += f" · prakiraan ISPU {k['ispu_prakiraan']}"
-        fig.text(0.56, y + 0.004, info, fontsize=14, color=MUTED)
-        y -= 0.042
+        fig.text(X(605), Y(y), info, fontsize=14, color=MUTED, va="center")
+        y += 57
 
     # --- kaki
-    fig.text(0.05, 0.035, "Sumber: NASA FIRMS (titik panas, belum tentu kebakaran), Open-Meteo/CAMS (prakiraan dan angin),\n"
+    fig.text(X(54), Y(tinggi - 28), "Sumber: NASA FIRMS (titik panas, belum tentu kebakaran), Open-Meteo/CAMS (prakiraan dan angin),\n"
              "WAQI (stasiun). Batas: BAKOSURTANAL. Inisiatif warga, bukan kanal resmi pemerintah.",
-             fontsize=11.5, color=MUTED, linespacing=1.5)
+             fontsize=11.5, color=MUTED, linespacing=1.5, va="bottom")
     if os.environ.get("FIXTURES"):
-        fig.text(0.5, 0.6, "CONTOH DATA UJI", fontsize=70, color="#C62828", alpha=0.18, weight="bold",
+        fig.text(0.5, Y(PETA_ATAS + peta_h / 2), "CONTOH DATA UJI", fontsize=70, color="#C62828", alpha=0.18, weight="bold",
                  ha="center", va="center", rotation=25)
     fig.savefig(path, dpi=100, facecolor=BG)
     plt.close(fig)
