@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 AKAR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, AKAR)
-from bot import analisis, main, pesan, telegram  # noqa: E402
+from bot import analisis, main, pesan, sumber, telegram  # noqa: E402
 
 
 class TesAnalisis(unittest.TestCase):
@@ -36,9 +36,53 @@ class TesAnalisis(unittest.TestCase):
         self.assertEqual(len(baru), 1)
         self.assertEqual(len(lama), 1)
 
+    def test_arah_angin(self):
+        # angin DATANG dari tenggara (135°) -> asap terbawa ke barat laut
+        now = datetime(2026, 10, 10, 23, tzinfo=timezone.utc)
+        jam = [f"2026-10-11T{h:02d}:00" for h in range(24)]
+        grid = {"lats": [0], "lons": [0], "titik": [{"lat": 0, "lon": 0, "waktu": jam,
+                                                      "laju": [10] * 24, "arah": [135] * 24}]}
+        a = analisis.ringkas_angin(grid, now)
+        self.assertEqual(analisis.nama_arah(a["arah_ke"]), "barat laut")
+        self.assertFalse(a["lemah"])
+        self.assertIn("barat laut", pesan.kalimat_angin(a))
+
+    def test_klaster(self):
+        t = [{"lat": -2.0 + i * 0.001, "lon": 113.0} for i in range(30)] + \
+            [{"lat": -3.0, "lon": 111.0 + i * 0.001} for i in range(20)] + [{"lat": 0.5, "lon": 115.0}]
+        k = analisis.klaster_titik(t)
+        self.assertEqual([x["n"] for x in k], [30, 20])  # 20 >= 30% x 30
+
     def test_tren(self):
         self.assertTrue(pesan.tren(100, 40).startswith("naik"))
         self.assertTrue(pesan.tren(10, 60).startswith("turun"))
+
+
+class TesGrid(unittest.TestCase):
+    def test_potong_grid_urutan_tetap(self):
+        lats, lons = sumber._titik_grid((110, -4, 118, 2), 0.5)
+        grid = {"lats": lats, "lons": lons, "titik": [{"lat": la, "lon": lo} for la in lats for lo in lons]}
+        g = sumber.potong_grid(grid, (112.2, -2.1, 114.0, -1.0), 0.5)
+        self.assertEqual(g["lons"][0], 112.0)  # satu titik di luar tepi barat 112,2
+        self.assertEqual(g["lats"][-1], -0.5)
+        # tetap berurutan baris per baris, jadi bisa dibentuk jadi matriks
+        self.assertEqual([(p["lat"], p["lon"]) for p in g["titik"]],
+                         [(la, lo) for la in g["lats"] for lo in g["lons"]])
+
+    def test_jatah_per_menit(self):
+        tidur = []
+        asli_sleep, asli_mono = sumber.time.sleep, sumber.time.monotonic
+        jam = [1000.0]
+        sumber.time.sleep = lambda d: (tidur.append(d), jam.__setitem__(0, jam[0] + d))
+        sumber.time.monotonic = lambda: jam[0]
+        sumber._riwayat_om.clear()
+        try:
+            for n in (250, 250, 250, 25):
+                sumber._jatah_open_meteo(n)
+        finally:
+            sumber.time.sleep, sumber.time.monotonic = asli_sleep, asli_mono
+            sumber._riwayat_om.clear()
+        self.assertEqual(len(tidur), 1)  # 500 lokasi pertama langsung, sisanya setelah jeda 1 menit
 
 
 class TesPanduan(unittest.TestCase):
@@ -144,6 +188,7 @@ class TesUjung(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("[kalteng]", r.stdout)
         self.assertNotIn("[kalbar]", r.stdout)  # --provinsi membatasi provinsi yang dijalankan
+        self.assertNotIn("gagal", r.stdout)  # grid angin dan asap dari data contoh terbaca
 
 
 if __name__ == "__main__":

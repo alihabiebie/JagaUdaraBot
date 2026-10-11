@@ -35,3 +35,36 @@ json.dump({"status": "ok", "data": {"aqi": 214, "city": {"name": "Palangka Raya,
            "time": {"iso": "2026-11-10T05:00:00+07:00".replace("2026-11-10", "2026-10-11")}}},
           open(os.path.join(D, "waqi_palangka_raya.json"), "w"))
 print("fixture dibuat di", D)
+
+# ---- grid angin dan PM2.5 (format jawaban Open-Meteo untuk banyak lokasi: list of objek)
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bot import kartu, sumber  # noqa: E402
+geo = json.load(open(os.path.join(os.path.dirname(D), "..", "data", "batas-provinsi.geojson")))
+geom = next(f["geometry"] for f in geo["features"] if f["properties"]["kode"] == "62")
+bbox = kartu.batas_peta(geom)
+jam = [(mulai + timedelta(hours=h)).strftime("%Y-%m-%dT%H:00") for h in range(48 + 24)]
+
+lats, lons = sumber._titik_grid(bbox, 1.0)
+angin = []
+for la in lats:
+    for lo in lons:
+        # musim kemarau: angin dari tenggara (±135°), sedikit berbelok ke arah utara
+        arah = [round(130 + 12 * math.sin((lo - 110) / 2) + 8 * math.sin(h / 6), 1) for h in range(len(jam))]
+        laju = [round(11 + 3 * math.sin(h / 5) + (la + 3) * 0.8, 1) for h in range(len(jam))]
+        angin.append({"latitude": la, "longitude": lo, "hourly": {"time": jam, "wind_speed_10m": laju, "wind_direction_10m": arah}})
+json.dump(angin, open(os.path.join(D, "grid_angin_kalteng.json"), "w"))
+
+lats, lons = sumber._titik_grid(bbox, 0.5)
+pm = []
+for la in lats:
+    for lo in lons:
+        nilai = 12.0
+        for kla, klo, n1, _, _ in KLASTER:
+            # gumpalan asap bergeser ke barat laut (searah angin)
+            d2 = ((la - (kla + 0.35)) / 0.7) ** 2 + ((lo - (klo - 0.35)) / 0.8) ** 2
+            nilai += n1 * 3.2 * math.exp(-d2)
+        seri = [round(nilai * (0.75 + 0.5 * math.exp(-(((h % 24) - 7) / 3) ** 2)), 1) for h in range(len(jam))]
+        pm.append({"latitude": la, "longitude": lo, "hourly": {"time": jam, "pm2_5": seri}})
+json.dump(pm, open(os.path.join(D, "grid_pm25_kalteng.json"), "w"))
+print("grid angin dan PM2.5 dibuat")

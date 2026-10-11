@@ -26,6 +26,8 @@ AKAR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Ringkasan + PDF dikirim tiap 3 jam pada putaran yang jatuh di jam 06.00-23.59 WIB
 # (jadwal 06, 09, 12, 15, 18, 21). Putaran 00 dan 03 hanya mengirim kalau status naik.
 JAM_HARIAN_WIB = range(6, 24)
+# jarak antartitik grid peta (derajat): angin dan prakiraan asap
+LANGKAH_GRID = {"angin": 1.0, "pm25": 0.5}
 
 
 def _baca_json(path, bawaan):
@@ -149,6 +151,32 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
     if mode == "otomatis":
         mode = "harian" if jam_wib in JAM_HARIAN_WIB else "cek"
 
+    def _sudah_dikirim(prov):
+        return otomatis and not coba and status.get(prov["id"], {}).get("slot", "") == slot
+
+    # Grid angin dan asap diambil SEKALI untuk gabungan wilayah semua provinsi yang diproses
+    # (peta antarprovinsi saling tumpang tindih), lalu dipotong per provinsi. Ini menghemat
+    # kuota gratis Open-Meteo: ±800 lokasi per putaran, bukan ±1.250.
+    kotak_peta = {}
+    for prov in cfg.get("provinsi", []):
+        f = fitur.get(prov.get("kode_bps"))
+        if prov.get("aktif") and f and (not hanya or prov["id"] in hanya) and not _sudah_dikirim(prov):
+            kotak_peta[prov["id"]] = kartu.batas_peta(f["geometry"])
+    grid = {}
+
+    def _grid(jenis):
+        if jenis not in grid:
+            k = kotak_peta.values()
+            bb = (min(b[0] for b in k), min(b[1] for b in k), max(b[2] for b in k), max(b[3] for b in k))
+            nama = f"grid_{jenis}_{'-'.join(kotak_peta)}.json"
+            try:
+                grid[jenis] = (sumber.angin_grid(bb, LANGKAH_GRID[jenis], nama) if jenis == "angin"
+                               else sumber.pm25_grid(bb, LANGKAH_GRID[jenis], nama))
+            except (sumber.GagalAmbil, KeyError, ValueError, TypeError) as e:
+                print(f"grid {jenis} gagal, peta tanpa lapisan {jenis}: {e}")
+                grid[jenis] = None
+        return grid[jenis]
+
     ringkasan = []
     galat = 0
     terkirim = 0
@@ -158,7 +186,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         if hanya and prov["id"] not in hanya:
             continue
         slot_lama = status.get(prov["id"], {}).get("slot", "")
-        if otomatis and not coba and slot_lama == slot:
+        if _sudah_dikirim(prov):
             dilewati.append(prov["id"])
             continue
         f = fitur.get(prov["kode_bps"])
@@ -169,7 +197,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         try:
             titik = sumber.titik_api(analisis.bbox_wilayah(geom), map_key)
         except sumber.GagalAmbil as e:
-            print(f"[{prov['id']}] GAGAL ambil titik api: {e}")
+            print(f"[{prov['id']}] GAGAL ambil titik panas: {e}")
             galat += 1
             continue
         prak, stas = {}, {}
@@ -183,6 +211,21 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
 
         hasil = analisis.nilai_provinsi(prov, geom, titik, prak, stas, radius, sekarang)
 
+        # lapisan peta tambahan; kalau gagal, kartu tetap dibuat tanpa lapisan ini
+        bbox_peta = kartu.batas_peta(geom)
+        try:
+            hasil["angin"] = analisis.ringkas_angin(
+                sumber.potong_grid(_grid("angin"), bbox_peta, LANGKAH_GRID["angin"]), sekarang)
+        except (KeyError, ValueError, TypeError) as e:
+            print(f"[{prov['id']}] data angin gagal, peta tanpa panah angin: {e}")
+            hasil["angin"] = None
+        try:
+            hasil["asap_grid"] = analisis.ringkas_asap_grid(
+                sumber.potong_grid(_grid("pm25"), bbox_peta, LANGKAH_GRID["pm25"]), sekarang)
+        except (KeyError, ValueError, TypeError) as e:
+            print(f"[{prov['id']}] grid asap gagal, peta tanpa bayangan asap: {e}")
+            hasil["asap_grid"] = None
+
         lama = status.get(prov["id"], {}).get("kota", {})
         # peringatan di luar jadwal hanya kalau ada kota yang naik ke SIAGA atau BAHAYA,
         # supaya pelanggan tidak kebanjiran pesan
@@ -194,7 +237,8 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         folder = os.path.join(os.environ.get("ARSIP_DIR") or os.path.join(AKAR, "arsip"), f"{cap:%Y}", f"{cap:%m}")
         os.makedirs(folder, exist_ok=True)
         dasar = os.path.join(folder, f"{cap:%d-%H%M}-{prov['id']}")
-        png = kartu.buat(hasil, geom, [x for x in batas["features"] if x is not f], dasar + ".png", radius)
+        png = kartu.buat(hasil, geom, [x for x in batas["features"] if x is not f], dasar + ".png", radius,
+                         status_lama=lama or None)
         uji = "[CONTOH, DATA UJI]\n" if os.environ.get("FIXTURES") else ""
         teks_tg = uji + pesan.harian(hasil, radius)
         teks_wa = uji + pesan.harian(hasil, radius, wa=True)
@@ -244,7 +288,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
             # slot ditandai selesai hanya kalau semua pesan terkirim, supaya pemicu cadangan bisa mengulang
             "slot": slot if (otomatis and not coba and not gagal_kirim) else slot_lama,
         }
-        ringkasan.append(f"[{prov['id']}] {analisis.TINGKAT[hasil['tingkat']]}, {hasil['titik_prov_24j']} titik api, "
+        ringkasan.append(f"[{prov['id']}] {analisis.TINGKAT[hasil['tingkat']]}, {hasil['titik_prov_24j']} titik panas, "
                          f"mode {mode}, {'kirim ' + str(len(kirim)) + ' pesan' if kirim else 'tidak ada pesan'}"
                          f"{' (uji coba, tidak dikirim)' if coba and kirim else ''} -> {os.path.relpath(dasar, AKAR)}")
 
