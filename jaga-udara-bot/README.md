@@ -8,7 +8,9 @@ Inisiatif warga, bukan kanal resmi pemerintah. Biaya: Rp 0.
 
 ## Apa yang dikerjakan bot
 
-Setiap 3 jam mulai 06.00 WIB (06.00, 09.00, 12.00, 15.00, 18.00, 21.00, 00.00, 03.00) bot:
+Setiap 3 jam mulai 06.00 WIB (06.00, 09.00, 12.00, 15.00, 18.00, 21.00, 00.00, 03.00) bot berikut dijalankan. Pemicunya **cron-job.org** supaya tepat waktu, dengan jadwal GitHub sebagai cadangan; cara memasangnya ada di [docs/PANDUAN-CRON-JOB.md](docs/PANDUAN-CRON-JOB.md). Kalau dua pemicu jalan untuk slot yang sama, pesan hanya dikirim sekali.
+
+Yang dikerjakan bot:
 
 1. **Mengambil data**
    - Titik api 3 hari terakhir dari satelit VIIRS (NASA FIRMS)

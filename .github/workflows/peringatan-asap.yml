@@ -2,25 +2,36 @@ name: Peringatan asap
 
 on:
   schedule:
-    # Tiap 3 jam mulai 06.00 WIB. Jam UTC 23, 02, 05, 08, 11, 14, 17, 20
-    # = 06.00, 09.00, 12.00, 15.00, 18.00, 21.00, 00.00, 03.00 WIB.
-    # 06.00-21.00: pesan + kartu + PDF. 00.00 dan 03.00: hanya kalau status naik.
-    # GitHub kadang menjalankan jadwal terlambat 5-30 menit.
-    - cron: "0 2-23/3 * * *"
+    # Pemicu UTAMA: cron-job.org menekan "Run workflow" (pemicu=eksternal) tepat
+    # pukul 00.01, 03.01, 06.01, ... WIB. Lihat jaga-udara-bot/docs/PANDUAN-CRON-JOB.md.
+    # Jadwal GitHub di bawah hanya CADANGAN (sering telat/terlewat). Kalau slot itu
+    # sudah dikirim oleh cron-job.org, bot melewatinya, jadi pesan tidak dobel.
+    # Jam UTC 23, 02, 05, ... = 06, 09, 12, 15, 18, 21, 00, 03 WIB, menit :20.
+    - cron: "20 2-23/3 * * *"
   workflow_dispatch:
     inputs:
       mode:
-        description: "otomatis / harian / cek"
+        description: "otomatis = sesuai jam; harian = paksa kirim ringkasan; cek = hanya kalau status naik"
         required: false
-        default: "otomatis"
+        type: choice
+        options: [otomatis, harian, cek]
+        default: otomatis
       coba:
-        description: "Isi 'ya' untuk uji coba tanpa mengirim pesan"
+        description: "ya = uji coba tanpa mengirim pesan"
         required: false
+        type: choice
+        options: ["tidak", "ya"]
         default: "tidak"
       provinsi:
         description: "Kosongkan untuk semua provinsi, atau isi mis. kalbar,kalsel,kaltim,kaltara"
         required: false
         default: ""
+      pemicu:
+        description: "Diisi otomatis oleh cron-job.org (eksternal). Biarkan 'manual'."
+        required: false
+        type: choice
+        options: [manual, eksternal]
+        default: manual
 
 permissions:
   contents: write
@@ -64,12 +75,20 @@ jobs:
           TELEGRAM_CHAT_JAMBI: ${{ secrets.TELEGRAM_CHAT_JAMBI }}
           TELEGRAM_CHAT_SUMSEL: ${{ secrets.TELEGRAM_CHAT_SUMSEL }}
           WAQI_TOKEN: ${{ secrets.WAQI_TOKEN }}
-          PROVINSI: ${{ github.event.inputs.provinsi }}
+          # Isian tombol Run dilewatkan lewat env, tidak ditempel langsung ke skrip,
+          # supaya tidak bisa disisipi perintah shell.
+          MODE: ${{ inputs.mode || 'otomatis' }}
+          COBA: ${{ inputs.coba }}
+          PROVINSI: ${{ inputs.provinsi }}
+          PEMICU: ${{ inputs.pemicu }}
         run: |
-          ARGS="--mode ${{ github.event.inputs.mode || 'otomatis' }}"
-          if [ "${{ github.event.inputs.coba }}" = "ya" ]; then ARGS="$ARGS --coba"; fi
-          if [ -n "$PROVINSI" ]; then ARGS="$ARGS --provinsi $PROVINSI"; fi
-          python -m bot.main $ARGS
+          ARGS=(--mode "$MODE")
+          if [ "$COBA" = "ya" ]; then ARGS+=(--coba); fi
+          if [ -n "$PROVINSI" ]; then
+            if ! [[ "$PROVINSI" =~ ^[a-z,]+$ ]]; then echo "Isian provinsi tidak valid: hanya huruf kecil dan koma"; exit 1; fi
+            ARGS+=(--provinsi "$PROVINSI")
+          fi
+          python -m bot.main "${ARGS[@]}"
 
       - name: Simpan arsip dan status ke repo
         if: always()
