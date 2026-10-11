@@ -12,12 +12,21 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib import font_manager  # noqa: E402
 import numpy as np  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 from matplotlib.patches import Circle, FancyArrow, FancyBboxPatch, Polygon  # noqa: E402
 
 from .analisis import TINGKAT, bbox_wilayah  # noqa: E402
-from .pesan import kalimat_angin, tanggal, tren  # noqa: E402
+from .pesan import angka, kalimat_angin, tanggal, tren  # noqa: E402
+
+# huruf Inter disertakan di repo supaya kartu di GitHub sama dengan di komputer (lisensi: fonts/LICENSE-Inter.txt)
+_FOLDER_HURUF = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fonts")
+for _nama in ("Inter-Regular.otf", "Inter-Bold.otf"):
+    _path = os.path.join(_FOLDER_HURUF, _nama)
+    if os.path.exists(_path):
+        font_manager.fontManager.addfont(_path)
+plt.rcParams["font.family"] = ["Inter", "DejaVu Sans"]
 
 WARNA = ["#2E9E4F", "#E0A800", "#E8710A", "#C62828"]
 INK, MUTED, BG, LAND, LAND_LAIN, GARIS = "#14201F", "#4D5E5A", "#FBFCFA", "#E4ECE9", "#F1F4F2", "#9FB3AE"
@@ -55,11 +64,15 @@ def _panah_angin(ax, angin, xy, x0, y0, x1, y1):
         return False
     jarak_aman = 0.22  # derajat (~25 km) dari titik panas terdekat
     ada = False
+    rata = math.hypot(angin["u"], angin["v"]) or 1
     for p in angin["titik"]:
         if not (x0 + 0.3 < p["lon"] < x1 - 0.3 and y0 + 0.3 < p["lat"] < y1 - 0.3):
             continue
         laju = math.hypot(p["u"], p["v"])
         if laju < 1:
+            continue
+        # panah yang berlawanan dengan arah umum (lebih dari 60°) tidak digambar, supaya tidak membingungkan
+        if (p["u"] * angin["u"] + p["v"] * angin["v"]) / (laju * rata) < 0.5:
             continue
         panjang = 0.32 + 0.22 * min(laju / 20, 1)
         dx, dy = p["u"] / laju * panjang, p["v"] / laju * panjang
@@ -75,7 +88,7 @@ def _panah_angin(ax, angin, xy, x0, y0, x1, y1):
     return ada
 
 
-def _label_kota(ax, fig, k, xy, terpakai):
+def _label_kota(ax, fig, k, xy, terpakai, semua_kota):
     """Nama kota di posisi yang paling sedikit menutup titik panas dan tidak menimpa nama lain."""
     calon = [(9, 7, "left", "bottom"), (-9, 7, "right", "bottom"), (9, -7, "left", "top"),
              (-9, -7, "right", "top"), (0, 13, "center", "bottom"), (0, -13, "center", "top"),
@@ -94,10 +107,14 @@ def _label_kota(ax, fig, k, xy, terpakai):
         tutup = int(((xy[:, 0] > bx0) & (xy[:, 0] < bx1) & (xy[:, 1] > by0) & (xy[:, 1] < by1)).sum()) if len(xy) else 0
         tabrak = any(bx0 < b[2] and bx1 > b[0] and by0 < b[3] and by1 > b[1] for b in terpakai)
         keluar = bb.x0 < ax.bbox.x0 or bb.x1 > ax.bbox.x1 or bb.y0 < ax.bbox.y0 or bb.y1 > ax.bbox.y1
-        skor = (tabrak or keluar, tutup, urut)
+        # label tidak boleh lebih dekat ke bulatan kota lain daripada ke kotanya sendiri
+        cx, cy = (bx0 + bx1) / 2, (by0 + by1) / 2
+        sendiri = math.hypot(cx - k["lon"], cy - k["lat"])
+        rancu = any(math.hypot(cx - o["lon"], cy - o["lat"]) < sendiri for o in semua_kota if o is not k)
+        skor = (tabrak or keluar or rancu, tutup, urut)
         if terbaik is None or skor < terbaik[0]:
             terbaik = (skor, dx, dy, ha, va, (bx0, by0, bx1, by1))
-        if not tabrak and not keluar and tutup == 0:
+        if not tabrak and not keluar and not rancu and tutup == 0:
             break
     _, dx, dy, ha, va, kotak = terbaik
     terpakai.append(kotak)
@@ -164,7 +181,7 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
                           transform=fig.transFigure, facecolor=WARNA[t], edgecolor="none")
     fig.patches.append(chip)
     fig.text(X(70), Y(198), f"Status provinsi: {TINGKAT[t]}", fontsize=19, color="white", weight="bold", va="center")
-    fig.text(X(540), Y(198), f"{hasil['titik_prov_24j']} titik panas dalam 24 jam "
+    fig.text(X(540), Y(198), f"{angka(hasil['titik_prov_24j'])} titik panas dalam 24 jam "
              f"({tren(hasil['titik_prov_24j'], hasil['titik_prov_24j_sebelumnya'])})",
              fontsize=16, color=INK, va="center")
     _baris_angin(fig, hasil, Y)
@@ -196,7 +213,7 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
     fig.canvas.draw()  # ukuran teks baru bisa diukur setelah digambar sekali
     terpakai = []
     for k in hasil["kota"]:
-        _label_kota(ax, fig, k, xy, terpakai)
+        _label_kota(ax, fig, k, xy, terpakai, hasil["kota"])
 
     tanda = []
     if len(xy):
@@ -228,7 +245,7 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
         fig.text(X(140), Y(y), TINGKAT[k["tingkat"]], fontsize=14, color="white", weight="bold", ha="center",
                  va="center")
         fig.text(X(254), Y(y), k["nama"], fontsize=17, color=INK, weight="bold", va="center")
-        info = f"{k['titik_24j']} titik panas"
+        info = f"{angka(k['titik_24j'])} titik panas"
         if k["ispu_prakiraan"] is not None:
             info += f" · prakiraan ISPU {k['ispu_prakiraan']}"
         fig.text(X(605), Y(y), info, fontsize=14, color=MUTED, va="center")

@@ -54,10 +54,10 @@ def tren(baru, lama):
     if lama == 0 and baru == 0:
         return "sama"
     if baru > lama * 1.2 + 2:
-        return f"naik dari {lama}"
+        return f"naik dari {angka(lama)}"
     if baru < lama * 0.8 - 2:
-        return f"turun dari {lama}"
-    return f"kemarin {lama}"
+        return f"turun dari {angka(lama)}"
+    return f"kemarin {angka(lama)}"
 
 
 def _gabung(nama):
