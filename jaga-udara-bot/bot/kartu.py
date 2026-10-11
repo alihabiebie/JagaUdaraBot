@@ -232,7 +232,7 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
     tanda = []
     if len(xy):
         for _, nama, warna, ukuran in KELAS_API:
-            tanda.append(Line2D([], [], ls="none", marker="o", ms=math.sqrt(ukuran) * 1.1, color=warna,
+            tanda.append(Line2D([], [], ls="none", marker="o", ms=math.sqrt(ukuran) * 1.6, color=warna,
                                 markeredgecolor="white", markeredgewidth=0.4, label=nama))
     if ada_panah:
         tanda.append(Line2D([], [], ls="none", marker=r"$\rightarrow$", ms=22, color=ANGIN, alpha=0.7,
