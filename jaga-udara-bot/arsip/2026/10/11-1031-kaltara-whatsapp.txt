@@ -1,0 +1,20 @@
+🟡 *Kabar asap Kalimantan Utara*
+Minggu, 11 Okt 2026, 10.31 WIB
+
+Status provinsi: *WASPADA*
+Titik api 24 jam terakhir: 5 (kemarin 4)
+
+*Per kota (titik api dalam 50 km):*
+🟡 *Malinau*: WASPADA
+   titik api 1 (kemarin 0); prakiraan asap sedang, terpekat besok 02.00
+🟡 *Tanjung Selor*: WASPADA
+   titik api 0 (sama); prakiraan asap sedang, terpekat hari ini 10.00; stasiun Tanjung Harapan: AQI 93
+🟢 *Tarakan*: AMAN
+   titik api 0 (kemarin 2); prakiraan asap baik, terpekat besok 09.00
+🟢 *Nunukan*: AMAN
+   titik api 0 (sama); prakiraan asap baik, terpekat hari ini 13.00
+
+*Yang perlu dilakukan:*
+Bayi, anak, lansia, ibu hamil, dan penderita asma atau sakit jantung: kurangi kegiatan lama di luar. Siapkan masker N95 atau KN95.
+
+_Titik api dari satelit NASA (bisa terlewat kalau tertutup awan atau asap tebal). Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
