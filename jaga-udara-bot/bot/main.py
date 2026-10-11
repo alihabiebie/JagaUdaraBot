@@ -26,8 +26,8 @@ AKAR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Ringkasan + PDF dikirim tiap 3 jam pada putaran yang jatuh di jam 06.00-23.59 WIB
 # (jadwal 06, 09, 12, 15, 18, 21). Putaran 00 dan 03 hanya mengirim kalau status naik.
 JAM_HARIAN_WIB = range(6, 24)
-# jarak antartitik grid peta (derajat): angin dan prakiraan asap
-LANGKAH_GRID = {"angin": 1.0, "pm25": 0.5}
+# jarak antartitik grid angin untuk peta (derajat)
+LANGKAH_GRID = {"angin": 1.0}
 
 
 def _baca_json(path, bawaan):
@@ -154,9 +154,9 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
     def _sudah_dikirim(prov):
         return otomatis and not coba and status.get(prov["id"], {}).get("slot", "") == slot
 
-    # Grid angin dan asap diambil SEKALI untuk gabungan wilayah semua provinsi yang diproses
-    # (peta antarprovinsi saling tumpang tindih), lalu dipotong per provinsi. Ini menghemat
-    # kuota gratis Open-Meteo: ±800 lokasi per putaran, bukan ±1.250.
+    # Grid angin diambil SEKALI untuk gabungan wilayah semua provinsi yang diproses
+    # (peta antarprovinsi saling tumpang tindih), lalu dipotong per provinsi, supaya hemat
+    # kuota gratis Open-Meteo.
     kotak_peta = {}
     for prov in cfg.get("provinsi", []):
         f = fitur.get(prov.get("kode_bps"))
@@ -170,8 +170,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
             bb = (min(b[0] for b in k), min(b[1] for b in k), max(b[2] for b in k), max(b[3] for b in k))
             nama = f"grid_{jenis}_{'-'.join(kotak_peta)}.json"
             try:
-                grid[jenis] = (sumber.angin_grid(bb, LANGKAH_GRID[jenis], nama) if jenis == "angin"
-                               else sumber.pm25_grid(bb, LANGKAH_GRID[jenis], nama))
+                grid[jenis] = sumber.angin_grid(bb, LANGKAH_GRID[jenis], nama)
             except (sumber.GagalAmbil, KeyError, ValueError, TypeError) as e:
                 print(f"grid {jenis} gagal, peta tanpa lapisan {jenis}: {e}")
                 grid[jenis] = None
@@ -214,7 +213,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
 
         hasil = analisis.nilai_provinsi(prov, geom, titik, prak, stas, radius, sekarang)
 
-        # lapisan peta tambahan; kalau gagal, kartu tetap dibuat tanpa lapisan ini
+        # arah angin untuk peta dan pesan; kalau gagal, kartu tetap dibuat tanpa panah angin
         bbox_peta = kartu.batas_peta(geom)
         try:
             hasil["angin"] = analisis.ringkas_angin(
@@ -222,12 +221,6 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         except (KeyError, ValueError, TypeError) as e:
             print(f"[{prov['id']}] data angin gagal, peta tanpa panah angin: {e}")
             hasil["angin"] = None
-        try:
-            hasil["asap_grid"] = analisis.ringkas_asap_grid(
-                sumber.potong_grid(_grid("pm25"), bbox_peta, LANGKAH_GRID["pm25"]), sekarang)
-        except (KeyError, ValueError, TypeError) as e:
-            print(f"[{prov['id']}] grid asap gagal, peta tanpa bayangan asap: {e}")
-            hasil["asap_grid"] = None
 
         lama = status.get(prov["id"], {}).get("kota", {})
         # peringatan di luar jadwal hanya kalau ada kota yang naik ke SIAGA atau BAHAYA,

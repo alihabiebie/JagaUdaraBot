@@ -36,7 +36,7 @@ json.dump({"status": "ok", "data": {"aqi": 214, "city": {"name": "Palangka Raya,
           open(os.path.join(D, "waqi_palangka_raya.json"), "w"))
 print("fixture dibuat di", D)
 
-# ---- grid angin dan PM2.5 (format jawaban Open-Meteo untuk banyak lokasi: list of objek)
+# ---- grid angin (format jawaban Open-Meteo untuk banyak lokasi: list of objek)
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from bot import kartu, sumber  # noqa: E402
@@ -55,16 +55,4 @@ for la in lats:
         angin.append({"latitude": la, "longitude": lo, "hourly": {"time": jam, "wind_speed_10m": laju, "wind_direction_10m": arah}})
 json.dump(angin, open(os.path.join(D, "grid_angin_kalteng.json"), "w"))
 
-lats, lons = sumber._titik_grid(bbox, 0.5)
-pm = []
-for la in lats:
-    for lo in lons:
-        nilai = 12.0
-        for kla, klo, n1, _, _ in KLASTER:
-            # gumpalan asap bergeser ke barat laut (searah angin)
-            d2 = ((la - (kla + 0.35)) / 0.7) ** 2 + ((lo - (klo - 0.35)) / 0.8) ** 2
-            nilai += n1 * 3.2 * math.exp(-d2)
-        seri = [round(nilai * (0.75 + 0.5 * math.exp(-(((h % 24) - 7) / 3) ** 2)), 1) for h in range(len(jam))]
-        pm.append({"latitude": la, "longitude": lo, "hourly": {"time": jam, "pm2_5": seri}})
-json.dump(pm, open(os.path.join(D, "grid_pm25_kalteng.json"), "w"))
-print("grid angin dan PM2.5 dibuat")
+print("grid angin dibuat")
