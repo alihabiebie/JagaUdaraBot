@@ -72,7 +72,7 @@ class TesLogJadwal(unittest.TestCase):
     def test_slot_dan_keterlambatan(self):
         lama = main.LOG_JADWAL
         main.LOG_JADWAL = os.path.join(tempfile.mkdtemp(), "log.csv")
-        env = {k: os.environ.get(k) for k in ("GITHUB_ACTIONS", "GITHUB_EVENT_NAME", "FIXTURES")}
+        env = {k: os.environ.get(k) for k in ("GITHUB_ACTIONS", "GITHUB_EVENT_NAME", "FIXTURES", "PEMICU")}
         os.environ.update(GITHUB_ACTIONS="true", GITHUB_EVENT_NAME="schedule")
         os.environ.pop("FIXTURES", None)
         try:
@@ -81,6 +81,11 @@ class TesLogJadwal(unittest.TestCase):
             with open(main.LOG_JADWAL, encoding="utf-8") as f:
                 isi = f.read().splitlines()
             self.assertEqual(isi[1], "2026-10-10 15.27,jadwal,2026-10-10 15.00,27,harian,3")
+            # cron-job.org memicu lewat workflow_dispatch dengan pemicu=eksternal
+            os.environ.update(GITHUB_EVENT_NAME="workflow_dispatch", PEMICU="eksternal")
+            main._catat_jadwal(datetime(2026, 10, 10, 23, 1, tzinfo=timezone.utc), "harian", 15)
+            with open(main.LOG_JADWAL, encoding="utf-8") as f:
+                self.assertEqual(f.read().splitlines()[2], "2026-10-11 06.01,eksternal,2026-10-11 06.00,1,harian,15")
         finally:
             main.LOG_JADWAL = lama
             for k, v in env.items():
@@ -88,6 +93,44 @@ class TesLogJadwal(unittest.TestCase):
                     os.environ.pop(k, None)
                 else:
                     os.environ[k] = v
+
+
+class TesPencegahDobel(unittest.TestCase):
+    """cron-job.org dan cron GitHub bisa jalan untuk slot yang sama; pesan hanya boleh terkirim sekali."""
+
+    def setUp(self):
+        self.env_lama = dict(os.environ)
+        os.environ.update(FIXTURES=os.path.join(AKAR, "tests", "fixtures"), WAKTU_UJI="2026-10-10T23:00:00+00:00",
+                          ARSIP_DIR=tempfile.mkdtemp(), STATE_DIR=tempfile.mkdtemp(),
+                          TELEGRAM_BOT_TOKEN="x", TELEGRAM_CHAT_KALTENG="@uji")
+        self.kirim = []
+        self.asli = (telegram.kirim_foto, telegram.kirim_teks, telegram.kirim_dokumen, telegram.sematkan)
+        telegram.kirim_foto = lambda *a: self.kirim.append("foto")
+        telegram.kirim_teks = lambda *a: self.kirim.append("teks")
+        telegram.kirim_dokumen = lambda *a: self.kirim.append("pdf") or 1
+        telegram.sematkan = lambda *a: None
+
+    def tearDown(self):
+        telegram.kirim_foto, telegram.kirim_teks, telegram.kirim_dokumen, telegram.sematkan = self.asli
+        os.environ.clear()
+        os.environ.update(self.env_lama)
+
+    def test_slot_sama_tidak_dikirim_dua_kali(self):
+        main.jalankan("otomatis", hanya={"kalteng"})
+        self.assertEqual(self.kirim, ["foto", "teks", "pdf"])
+        main.jalankan("otomatis", hanya={"kalteng"})  # pemicu kedua di slot 06.00 yang sama
+        self.assertEqual(len(self.kirim), 3)
+
+    def test_slot_berikutnya_dikirim_lagi(self):
+        main.jalankan("otomatis", hanya={"kalteng"})
+        os.environ["WAKTU_UJI"] = "2026-10-11T02:05:00+00:00"  # 09.05 WIB, slot baru
+        main.jalankan("otomatis", hanya={"kalteng"})
+        self.assertEqual(len(self.kirim), 6)
+
+    def test_manual_harian_tetap_kirim(self):
+        main.jalankan("otomatis", hanya={"kalteng"})
+        main.jalankan("harian", hanya={"kalteng"})  # tombol Run manual tidak dihalangi
+        self.assertEqual(len(self.kirim), 6)
 
 
 class TesUjung(unittest.TestCase):

@@ -46,6 +46,22 @@ LOG_JADWAL = os.path.join(AKAR, "state", "log-jadwal.csv")
 KOLOM_LOG = ["mulai_wib", "pemicu", "slot_wib", "terlambat_menit", "mode", "pesan_terkirim"]
 
 
+def _slot(dt):
+    """Slot jadwal (06.00, 09.00, ... WIB) tempat waktu ini jatuh, sebagai teks 'YYYY-MM-DD HH.00'."""
+    wib = dt.astimezone(analisis.WIB)
+    return f"{wib:%Y-%m-%d} {wib.hour - wib.hour % 3:02d}.00"
+
+
+def _pemicu():
+    """jadwal = cron GitHub, eksternal = cron-job.org (workflow_dispatch dengan pemicu=eksternal), manual = tombol Run."""
+    acara = os.environ.get("GITHUB_EVENT_NAME", "")
+    if acara == "schedule":
+        return "jadwal"
+    if acara == "workflow_dispatch":
+        return "eksternal" if os.environ.get("PEMICU") == "eksternal" else "manual"
+    return "lain"
+
+
 def _catat_jadwal(mulai, mode, terkirim):
     """Catat jam bot benar-benar mulai dibanding slot jadwalnya (06.00, 09.00, ... WIB).
 
@@ -56,13 +72,13 @@ def _catat_jadwal(mulai, mode, terkirim):
         return
     wib = mulai.astimezone(analisis.WIB)
     slot = wib.replace(hour=wib.hour - wib.hour % 3, minute=0, second=0, microsecond=0)
-    pemicu = {"schedule": "jadwal", "workflow_dispatch": "manual"}.get(os.environ.get("GITHUB_EVENT_NAME", ""), "lain")
+    pemicu = _pemicu()
+    terjadwal = pemicu in ("jadwal", "eksternal")  # slot hanya bermakna untuk jalan terjadwal
     baris = {
         "mulai_wib": f"{wib:%Y-%m-%d %H.%M}",
         "pemicu": pemicu,
-        # slot hanya bermakna untuk jalan terjadwal
-        "slot_wib": f"{slot:%Y-%m-%d %H.%M}" if pemicu == "jadwal" else "",
-        "terlambat_menit": int((wib - slot) / timedelta(minutes=1)) if pemicu == "jadwal" else "",
+        "slot_wib": f"{slot:%Y-%m-%d %H.%M}" if terjadwal else "",
+        "terlambat_menit": int((wib - slot) / timedelta(minutes=1)) if terjadwal else "",
         "mode": mode,
         "pesan_terkirim": terkirim,
     }
@@ -115,7 +131,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
     cfg = _baca_json(os.path.join(AKAR, "config", "provinsi.json"), {})
     batas = _baca_json(os.path.join(AKAR, "data", "batas-provinsi.geojson"), {"features": []})
     fitur = {f["properties"]["kode"]: f for f in batas["features"]}
-    status_path = os.path.join(AKAR, "state", "status.json")
+    status_path = os.path.join(os.environ.get("STATE_DIR") or os.path.join(AKAR, "state"), "status.json")
     status = _baca_json(status_path, {})
 
     map_key = os.environ.get("FIRMS_MAP_KEY", "")
@@ -125,6 +141,11 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
     panduan_pdf = os.path.join(AKAR, cfg["panduan_pdf"]) if cfg.get("panduan_pdf") else ""
 
     jam_wib = sekarang.astimezone(analisis.WIB).hour
+    # Pencegah kirim dobel: cron-job.org dan cron GitHub (cadangan) bisa sama-sama jalan untuk slot yang sama.
+    # Pada mode otomatis, provinsi yang slot ini sudah selesai dikirim akan dilewati.
+    otomatis = mode == "otomatis"
+    slot = _slot(sekarang)
+    dilewati = []
     if mode == "otomatis":
         mode = "harian" if jam_wib in JAM_HARIAN_WIB else "cek"
 
@@ -135,6 +156,10 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         if not prov.get("aktif"):
             continue
         if hanya and prov["id"] not in hanya:
+            continue
+        slot_lama = status.get(prov["id"], {}).get("slot", "")
+        if otomatis and not coba and slot_lama == slot:
+            dilewati.append(prov["id"])
             continue
         f = fitur.get(prov["kode_bps"])
         if not f:
@@ -190,6 +215,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         chat = os.environ.get(prov.get("chat_env", ""), "")
         panduan_lama = status.get(prov["id"], {}).get("panduan_sha", "")
         panduan_sha = panduan_lama
+        gagal_kirim = False
         if kirim and not coba:
             if not (tg_token and chat):
                 print(f"[{prov['id']}] TELEGRAM_BOT_TOKEN atau {prov.get('chat_env')} belum diisi, pesan tidak dikirim")
@@ -204,6 +230,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
                 except telegram.GagalKirim as e:
                     print(f"[{prov['id']}] GAGAL kirim: {e}")
                     galat += 1
+                    gagal_kirim = True
         # PDF panduan ikut setiap pesan; tanpa pesan pun tetap dikirim kalau isinya baru
         if panduan_pdf and not coba and tg_token and chat:
             panduan_sha = _kirim_panduan(tg_token, chat, panduan_pdf, panduan_lama, prov, selalu=bool(kirim))
@@ -214,14 +241,20 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
             "titik_prov_24j": hasil["titik_prov_24j"],
             "kota": {k["nama"]: k["tingkat"] for k in hasil["kota"]},
             "panduan_sha": panduan_sha,
+            # slot ditandai selesai hanya kalau semua pesan terkirim, supaya pemicu cadangan bisa mengulang
+            "slot": slot if (otomatis and not coba and not gagal_kirim) else slot_lama,
         }
         ringkasan.append(f"[{prov['id']}] {analisis.TINGKAT[hasil['tingkat']]}, {hasil['titik_prov_24j']} titik api, "
                          f"mode {mode}, {'kirim ' + str(len(kirim)) + ' pesan' if kirim else 'tidak ada pesan'}"
                          f"{' (uji coba, tidak dikirim)' if coba and kirim else ''} -> {os.path.relpath(dasar, AKAR)}")
 
+    semua_dilewati = bool(dilewati) and not ringkasan
+    if dilewati:
+        ringkasan.append(f"Slot {slot} WIB sudah dikirim sebelumnya untuk {', '.join(dilewati)}, dilewati supaya tidak dobel")
     if not coba:
         _tulis_json(status_path, status)
-    _catat_jadwal(mulai, mode + (" (coba)" if coba else ""), terkirim)
+    keterangan = mode + (" (coba)" if coba else "") + (" (dilewati, slot sudah dikirim)" if semua_dilewati else "")
+    _catat_jadwal(mulai, keterangan, terkirim)
     print("\n".join(ringkasan) or "Tidak ada provinsi aktif.")
     return 1 if galat else 0
 
