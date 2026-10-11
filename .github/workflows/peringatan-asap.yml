@@ -50,6 +50,10 @@ jobs:
         working-directory: jaga-udara-bot
     steps:
       - uses: actions/checkout@v4
+        with:
+          # ambil versi TERBARU cabang saat run mulai (bukan saat dipicu), supaya status dari
+          # run sebelumnya (slot yang sudah dikirim) terbaca dan pesan tidak dobel
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-python@v5
         with:
@@ -98,6 +102,11 @@ jobs:
           mkdir -p arsip state
           git add arsip state
           git diff --cached --quiet || git commit -m "Arsip $(TZ=Asia/Jakarta date '+%Y-%m-%d %H.%M') WIB"
-          # ambil perubahan terbaru dulu (misalnya kalau Anda mengedit file saat bot berjalan)
-          git pull --rebase --autostash || true
-          git push || echo "Push gagal (mungkin bentrok), akan dicoba di putaran berikutnya"
+          # Ambil perubahan terbaru dulu (run lain atau suntingan Anda). Kalau bentrok di state/,
+          # isi dari run ini yang dipakai (paling baru); log-jadwal.csv digabung (lihat .gitattributes).
+          for i in 1 2 3; do
+            if git pull --rebase -X theirs --autostash && git push; then exit 0; fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 5))
+          done
+          echo "::warning::Push arsip/status gagal 3 kali"
