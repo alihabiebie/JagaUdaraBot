@@ -30,7 +30,14 @@ plt.rcParams["font.family"] = ["Inter", "DejaVu Sans"]
 
 WARNA = ["#2E9E4F", "#E0A800", "#E8710A", "#C62828"]
 INK, MUTED, BG, LAND, LAND_LAIN, GARIS = "#14201F", "#4D5E5A", "#FBFCFA", "#E4ECE9", "#F1F4F2", "#9FB3AE"
-MERAH_TITIK = "#D2352F"
+# Kekuatan api dari satelit (FRP, megawatt): makin besar makin panas/luas apinya saat satelit lewat.
+# Warna dan ukuran sama-sama berubah, supaya tetap terbaca oleh penderita buta warna.
+# Catatan: kebakaran gambut yang membara bisa ber-FRP kecil tapi asapnya sangat banyak.
+KELAS_API = [  # (FRP minimal, nama, warna, ukuran titik)
+    (0, "Api kecil", "#F7A541", 16),
+    (5, "Api sedang", "#E0362C", 24),
+    (20, "Api besar", "#7A0A0A", 42),
+]
 ANGIN = "#2B5C8A"
 TAMBAH_PETA = 0.35  # derajat di sekeliling provinsi
 LEBAR = 1080
@@ -162,7 +169,7 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
     peta_bawah = PETA_ATAS + peta_h
     kota = hasil["kota"][:7]
     daftar_atas = peta_bawah + 45
-    tinggi = int(daftar_atas + 61 + 57 * max(len(kota) - 1, 0) + 135)
+    tinggi = int(daftar_atas + 61 + 57 * max(len(kota) - 1, 0) + 158)
     W = LEBAR
 
     def X(px):
@@ -205,8 +212,15 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
     xy = np.array([(p["lon"], p["lat"]) for p in pts], float).reshape(-1, 2)
     ada_panah = _panah_angin(ax, hasil.get("angin"), xy, x0, y0, x1, y1)
     if len(xy):
-        # titik panas di atas panah dan batas wilayah, supaya tidak pernah tertutup
-        ax.scatter(xy[:, 0], xy[:, 1], s=16, c=MERAH_TITIK, alpha=0.75, linewidths=0, zorder=4)
+        # titik panas di atas panah dan batas wilayah, supaya tidak pernah tertutup;
+        # api besar digambar paling atas
+        frp = np.array([p.get("frp") or 0 for p in pts], float)
+        for i, (bawah, _, warna, ukuran) in enumerate(KELAS_API):
+            atas = KELAS_API[i + 1][0] if i + 1 < len(KELAS_API) else np.inf
+            m = (frp >= bawah) & (frp < atas)
+            if m.any():
+                ax.scatter(xy[m, 0], xy[m, 1], s=ukuran, c=warna, alpha=0.85, edgecolors="white",
+                           linewidths=0.4, zorder=4 + i * 0.1)
     for k in hasil["kota"]:
         ax.scatter([k["lon"]], [k["lat"]], s=230, c=WARNA[k["tingkat"]], edgecolors="white",
                    linewidths=2.5, zorder=5)
@@ -217,8 +231,9 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
 
     tanda = []
     if len(xy):
-        tanda.append(Line2D([], [], ls="none", marker="o", ms=6, color=MERAH_TITIK, alpha=0.75,
-                            label="Titik panas 24 jam terakhir"))
+        for _, nama, warna, ukuran in KELAS_API:
+            tanda.append(Line2D([], [], ls="none", marker="o", ms=math.sqrt(ukuran) * 1.1, color=warna,
+                                markeredgecolor="white", markeredgewidth=0.4, label=nama))
     if ada_panah:
         tanda.append(Line2D([], [], ls="none", marker=r"$\rightarrow$", ms=22, color=ANGIN, alpha=0.7,
                             label="Arah angin (asap ikut terbawa)"))
@@ -231,7 +246,9 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
             return int(((xy[:, 0] > bx) & (xy[:, 0] < bx + w) & (xy[:, 1] > by) & (xy[:, 1] < by + h)).sum())
         pojok = min([(0, 0, "lower left"), (1, 0, "lower right"), (0, 1, "upper left"), (1, 1, "upper right")],
                     key=lambda p: _isi(p[0], p[1]) if len(xy) else 0)
-        ax.legend(handles=tanda, loc=pojok[2], fontsize=12, frameon=True, framealpha=0.9)
+        ax.legend(handles=tanda, loc=pojok[2], fontsize=12, frameon=True, framealpha=0.9,
+                  title="Titik panas 24 jam (kekuatan api)" if len(xy) else None, title_fontsize=12,
+                  alignment="left")
 
     # --- daftar kota
     y = daftar_atas
@@ -252,7 +269,8 @@ def buat(hasil, geom_target, semua_fitur, path, radius_km=None, status_lama=None
         y += 57
 
     # --- kaki
-    fig.text(X(54), Y(tinggi - 28), "Sumber: NASA FIRMS (titik panas, belum tentu kebakaran), Open-Meteo/CAMS (prakiraan dan angin),\n"
+    fig.text(X(54), Y(tinggi - 28), "Kekuatan api = panas yang terukur satelit. Gambut yang membara bisa tampak \"api kecil\" tapi asapnya pekat.\n"
+             "Sumber: NASA FIRMS (titik panas, belum tentu kebakaran), Open-Meteo/CAMS (prakiraan dan angin),\n"
              "WAQI (stasiun). Batas: BAKOSURTANAL. Inisiatif warga, bukan kanal resmi pemerintah.",
              fontsize=11.5, color=MUTED, linespacing=1.5, va="bottom")
     if os.environ.get("FIXTURES"):

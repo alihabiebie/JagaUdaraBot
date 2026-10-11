@@ -291,7 +291,11 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         }
         if not coba:
             _tulis_json(status_path, status)  # simpan tiap provinsi, supaya yang sudah terkirim tidak dikirim ulang
-        ringkasan.append(f"[{prov['id']}] {analisis.TINGKAT[hasil['tingkat']]}, {hasil['titik_prov_24j']} titik panas, "
+        frp = sorted(t.get("frp") or 0 for t in hasil["titik_peta"])
+        kelas = [sum(1 for v in frp if v >= b) for b, *_ in kartu.KELAS_API] + [0]
+        sebaran = (f"FRP median {frp[len(frp) // 2]:.1f} MW, kecil/sedang/besar = "
+                   + "/".join(str(kelas[i] - kelas[i + 1]) for i in range(len(kartu.KELAS_API)))) if frp else "tanpa titik"
+        ringkasan.append(f"[{prov['id']}] {analisis.TINGKAT[hasil['tingkat']]}, {hasil['titik_prov_24j']} titik panas ({sebaran}), "
                          f"mode {mode}, {'kirim ' + str(len(kirim)) + ' pesan' if kirim else 'tidak ada pesan'}"
                          f"{' (uji coba, tidak dikirim)' if coba and kirim else ''} -> {os.path.relpath(dasar, AKAR)}")
 
