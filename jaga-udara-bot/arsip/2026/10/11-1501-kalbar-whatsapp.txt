@@ -1,0 +1,23 @@
+🔴 *Kabar asap Kalimantan Barat*
+Minggu, 11 Okt 2026, 15.01 WIB
+
+Status provinsi: *BAHAYA*
+Titik panas 24 jam terakhir: 184 (kemarin 212)
+Angin membawa asap ke arah barat (±10 km/jam).
+
+*Per kota (titik panas dalam 50 km):*
+🔴 *Pontianak*: BAHAYA
+   titik panas 0 (sama); prakiraan asap sedang, terpekat hari ini 17.00; stasiun Supadio: AQI 226
+🟠 *Ketapang*: SIAGA
+   titik panas 47 (naik dari 23); prakiraan asap tidak sehat, terpekat besok 03.00
+🟠 *Sintang*: SIAGA
+   titik panas 0 (kemarin 2); prakiraan asap tidak sehat, terpekat besok 14.00; stasiun Sintang: AQI 152
+🟡 *Singkawang*: WASPADA
+   titik panas 0 (turun dari 3); prakiraan asap sedang, terpekat hari ini 15.00
+🟡 *Putussibau*: WASPADA
+   titik panas 0 (sama); prakiraan asap sedang, terpekat besok 14.00
+
+*Yang perlu dilakukan:*
+Semua orang sebisa mungkin di dalam rumah. Bayi, lansia, dan orang sakit di kamar bersih atau tempat berlindung. Segera ke puskesmas kalau sesak, bibir kebiruan, atau anak bernapas cepat.
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
