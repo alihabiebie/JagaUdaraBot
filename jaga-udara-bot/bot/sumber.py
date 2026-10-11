@@ -1,7 +1,7 @@
 """Mengambil data dari sumber terbuka.
 
-- NASA FIRMS  : titik api dari satelit (perlu MAP_KEY gratis)
-- Open-Meteo  : prakiraan PM2.5 per jam dari model CAMS (gratis, tanpa kunci)
+- NASA FIRMS  : titik panas (hotspot) dari satelit (perlu MAP_KEY gratis)
+- Open-Meteo  : prakiraan PM2.5 per jam dari model CAMS dan angin 10 m (gratis, tanpa kunci)
 - WAQI        : stasiun pemantau terdekat (perlu token gratis, opsional)
 
 Kalau variabel lingkungan FIXTURES berisi nama folder, data dibaca dari file
@@ -50,7 +50,7 @@ def _fixture(nama):
 
 # ---------------------------------------------------------------- FIRMS
 def titik_api(bbox, map_key, hari=3):
-    """Semua deteksi titik api VIIRS di dalam kotak bbox (barat, selatan, timur, utara).
+    """Semua deteksi titik panas VIIRS di dalam kotak bbox (barat, selatan, timur, utara).
 
     Mengembalikan list dict: lat, lon, waktu (datetime UTC), satelit, keyakinan, frp.
     """
@@ -84,6 +84,24 @@ def titik_api(bbox, map_key, hari=3):
 
 
 # ---------------------------------------------------------------- Open-Meteo
+# Batas gratis Open-Meteo: 600 lokasi per menit, 5.000 per jam, 10.000 per hari.
+# Permintaan banyak lokasi dihitung per lokasi, jadi grid dipecah dan diberi jeda.
+BATAS_PER_MENIT = 500
+POTONGAN_GRID = 250
+_riwayat_om = []  # (waktu, jumlah lokasi) permintaan Open-Meteo dalam 1 menit terakhir
+
+
+def _jatah_open_meteo(n):
+    """Tunggu seperlunya supaya permintaan n lokasi tidak melewati batas per menit."""
+    while True:
+        kini = time.monotonic()
+        _riwayat_om[:] = [(t, x) for t, x in _riwayat_om if kini - t < 61]
+        if not _riwayat_om or sum(x for _, x in _riwayat_om) + n <= BATAS_PER_MENIT:
+            _riwayat_om.append((kini, n))
+            return
+        time.sleep(61 - (kini - _riwayat_om[0][0]))
+
+
 def prakiraan_pm25(lat, lon, nama_fixture=None):
     """PM2.5 per jam (µg/m³), waktu lokal WIB, kemarin s.d. 3 hari ke depan."""
     teks = _fixture(f"openmeteo_{nama_fixture}.json") if nama_fixture else None
@@ -93,11 +111,88 @@ def prakiraan_pm25(lat, lon, nama_fixture=None):
             "hourly": "pm2_5", "timezone": "Asia/Jakarta",
             "past_days": 1, "forecast_days": 3,
         })
+        _jatah_open_meteo(1)
         teks = _get("https://air-quality-api.open-meteo.com/v1/air-quality?" + q)
     d = json.loads(teks)
     jam = d["hourly"]["time"]
     nilai = d["hourly"]["pm2_5"]
     return [(t, v) for t, v in zip(jam, nilai) if v is not None]
+
+
+def _titik_grid(bbox, langkah):
+    """Titik-titik grid teratur di dalam kotak (barat, selatan, timur, utara)."""
+    x0, y0, x1, y1 = bbox
+    lons = [round(x0 + i * langkah, 3) for i in range(int((x1 - x0) / langkah) + 2)]
+    lats = [round(y0 + j * langkah, 3) for j in range(int((y1 - y0) / langkah) + 2)]
+    return lats, lons
+
+
+def _ambil_grid(url_dasar, param, bbox, langkah, nama_fixture):
+    """Permintaan Open-Meteo untuk banyak lokasi sekaligus (dipecah per POTONGAN_GRID lokasi).
+
+    Mengembalikan (lats, lons, daftar) dengan daftar berurutan baris per baris
+    (lintang dari selatan ke utara, bujur dari barat ke timur).
+    """
+    lats, lons = _titik_grid(bbox, langkah)
+    teks = _fixture(nama_fixture) if nama_fixture else None
+    if teks is None:
+        titik = [(la, lo) for la in lats for lo in lons]
+        daftar = []
+        for i in range(0, len(titik), POTONGAN_GRID):
+            bagian = titik[i:i + POTONGAN_GRID]
+            q = urllib.parse.urlencode(dict(param,
+                                            latitude=",".join(f"{la:.3f}" for la, _ in bagian),
+                                            longitude=",".join(f"{lo:.3f}" for _, lo in bagian),
+                                            timezone="Asia/Jakarta", forecast_days=2))
+            _jatah_open_meteo(len(bagian))
+            d = json.loads(_get(url_dasar + "?" + q, tries=3))
+            daftar += d if isinstance(d, list) else [d]
+    else:
+        d = json.loads(teks)
+        daftar = d if isinstance(d, list) else [d]
+    if len(daftar) != len(lats) * len(lons):
+        raise GagalAmbil(f"grid Open-Meteo: jumlah lokasi {len(daftar)}, seharusnya {len(lats) * len(lons)}")
+    return lats, lons, daftar
+
+
+def potong_grid(grid, bbox, langkah):
+    """Bagian grid yang menutupi kotak bbox (ditambah satu langkah di tiap sisi)."""
+    if not grid:
+        return grid
+    x0, y0, x1, y1 = bbox
+    lats = [la for la in grid["lats"] if y0 - langkah <= la <= y1 + langkah]
+    lons = [lo for lo in grid["lons"] if x0 - langkah <= lo <= x1 + langkah]
+    sl, so = set(lats), set(lons)
+    return {"lats": lats, "lons": lons,
+            "titik": [p for p in grid["titik"] if p["lat"] in sl and p["lon"] in so]}
+
+
+def angin_grid(bbox, langkah=1.0, nama_fixture=None):
+    """Angin 10 m per jam di grid. Arah = arah DATANG angin (derajat, konvensi meteorologi)."""
+    lats, lons, daftar = _ambil_grid(
+        "https://api.open-meteo.com/v1/forecast",
+        {"hourly": "wind_speed_10m,wind_direction_10m", "wind_speed_unit": "kmh"},
+        bbox, langkah, nama_fixture)
+    hasil = []
+    for i, d in enumerate(daftar):
+        h = d["hourly"]
+        hasil.append({"lat": lats[i // len(lons)], "lon": lons[i % len(lons)], "waktu": h["time"],
+                      "laju": h["wind_speed_10m"], "arah": h["wind_direction_10m"]})
+    return {"lats": lats, "lons": lons, "titik": hasil}
+
+
+def pm25_grid(bbox, langkah=0.5, nama_fixture=None):
+    """Prakiraan PM2.5 per jam (µg/m³) di grid, model CAMS global."""
+    lats, lons, daftar = _ambil_grid(
+        "https://air-quality-api.open-meteo.com/v1/air-quality",
+        {"hourly": "pm2_5", "domains": "cams_global"},
+        bbox, langkah, nama_fixture)
+    hasil = []
+    for i, d in enumerate(daftar):
+        h = d["hourly"]
+        hasil.append({"lat": lats[i // len(lons)], "lon": lons[i % len(lons)],
+                      "seri": [(t, v) for t, v in zip(h["time"], h["pm2_5"]) if v is not None]})
+    return {"lats": lats, "lons": lons, "titik": hasil}
 
 
 # ---------------------------------------------------------------- WAQI

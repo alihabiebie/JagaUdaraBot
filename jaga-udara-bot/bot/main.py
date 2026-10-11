@@ -26,6 +26,8 @@ AKAR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Ringkasan + PDF dikirim tiap 3 jam pada putaran yang jatuh di jam 06.00-23.59 WIB
 # (jadwal 06, 09, 12, 15, 18, 21). Putaran 00 dan 03 hanya mengirim kalau status naik.
 JAM_HARIAN_WIB = range(6, 24)
+# jarak antartitik grid angin untuk peta (derajat)
+LANGKAH_GRID = {"angin": 1.0}
 
 
 def _baca_json(path, bawaan):
@@ -149,6 +151,31 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
     if mode == "otomatis":
         mode = "harian" if jam_wib in JAM_HARIAN_WIB else "cek"
 
+    def _sudah_dikirim(prov):
+        return otomatis and not coba and status.get(prov["id"], {}).get("slot", "") == slot
+
+    # Grid angin diambil SEKALI untuk gabungan wilayah semua provinsi yang diproses
+    # (peta antarprovinsi saling tumpang tindih), lalu dipotong per provinsi, supaya hemat
+    # kuota gratis Open-Meteo.
+    kotak_peta = {}
+    for prov in cfg.get("provinsi", []):
+        f = fitur.get(prov.get("kode_bps"))
+        if prov.get("aktif") and f and (not hanya or prov["id"] in hanya) and not _sudah_dikirim(prov):
+            kotak_peta[prov["id"]] = kartu.batas_peta(f["geometry"])
+    grid = {}
+
+    def _grid(jenis):
+        if jenis not in grid:
+            k = kotak_peta.values()
+            bb = (min(b[0] for b in k), min(b[1] for b in k), max(b[2] for b in k), max(b[3] for b in k))
+            nama = f"grid_{jenis}_{'-'.join(kotak_peta)}.json"
+            try:
+                grid[jenis] = sumber.angin_grid(bb, LANGKAH_GRID[jenis], nama)
+            except (sumber.GagalAmbil, KeyError, ValueError, TypeError) as e:
+                print(f"grid {jenis} gagal, peta tanpa lapisan {jenis}: {e}")
+                grid[jenis] = None
+        return grid[jenis]
+
     ringkasan = []
     galat = 0
     terkirim = 0
@@ -158,7 +185,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         if hanya and prov["id"] not in hanya:
             continue
         slot_lama = status.get(prov["id"], {}).get("slot", "")
-        if otomatis and not coba and slot_lama == slot:
+        if _sudah_dikirim(prov):
             dilewati.append(prov["id"])
             continue
         f = fitur.get(prov["kode_bps"])
@@ -167,9 +194,12 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
             continue
         geom = f["geometry"]
         try:
-            titik = sumber.titik_api(analisis.bbox_wilayah(geom), map_key)
+            # ambil titik panas seluas peta di kartu (lebih lebar dari provinsi), supaya tidak terpotong garis lurus
+            b1, b2 = analisis.bbox_wilayah(geom), kartu.batas_peta(geom)
+            titik = sumber.titik_api((min(b1[0], b2[0]), min(b1[1], b2[1]), max(b1[2], b2[2]), max(b1[3], b2[3])),
+                                     map_key)
         except sumber.GagalAmbil as e:
-            print(f"[{prov['id']}] GAGAL ambil titik api: {e}")
+            print(f"[{prov['id']}] GAGAL ambil titik panas: {e}")
             galat += 1
             continue
         prak, stas = {}, {}
@@ -183,6 +213,15 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
 
         hasil = analisis.nilai_provinsi(prov, geom, titik, prak, stas, radius, sekarang)
 
+        # arah angin untuk peta dan pesan; kalau gagal, kartu tetap dibuat tanpa panah angin
+        bbox_peta = kartu.batas_peta(geom)
+        try:
+            hasil["angin"] = analisis.ringkas_angin(
+                sumber.potong_grid(_grid("angin"), bbox_peta, LANGKAH_GRID["angin"]), sekarang)
+        except (KeyError, ValueError, TypeError) as e:
+            print(f"[{prov['id']}] data angin gagal, peta tanpa panah angin: {e}")
+            hasil["angin"] = None
+
         lama = status.get(prov["id"], {}).get("kota", {})
         # peringatan di luar jadwal hanya kalau ada kota yang naik ke SIAGA atau BAHAYA,
         # supaya pelanggan tidak kebanjiran pesan
@@ -194,7 +233,13 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         folder = os.path.join(os.environ.get("ARSIP_DIR") or os.path.join(AKAR, "arsip"), f"{cap:%Y}", f"{cap:%m}")
         os.makedirs(folder, exist_ok=True)
         dasar = os.path.join(folder, f"{cap:%d-%H%M}-{prov['id']}")
-        png = kartu.buat(hasil, geom, [x for x in batas["features"] if x is not f], dasar + ".png", radius)
+        try:
+            png = kartu.buat(hasil, geom, [x for x in batas["features"] if x is not f], dasar + ".png", radius,
+                             status_lama=lama or None)
+        except Exception as e:  # kartu gagal dibuat: pesan teks tetap dikirim
+            print(f"[{prov['id']}] GAGAL membuat kartu, hanya teks yang dikirim: {e!r}")
+            png = None
+            galat += 1
         uji = "[CONTOH, DATA UJI]\n" if os.environ.get("FIXTURES") else ""
         teks_tg = uji + pesan.harian(hasil, radius)
         teks_wa = uji + pesan.harian(hasil, radius, wa=True)
@@ -205,12 +250,12 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
 
         kirim = []
         if mode == "harian":
-            kirim = [("foto", png, pesan.keterangan_foto(hasil)), ("teks", teks_tg)]
+            kirim = [("foto", png, pesan.keterangan_foto(hasil)), ("teks", teks_tg)] if png else [("teks", teks_tg)]
         elif naik:
             teks_al = uji + pesan.peringatan(hasil, naik)
             with open(dasar + "-peringatan-whatsapp.txt", "w", encoding="utf-8") as fh:
                 fh.write(uji + pesan.peringatan(hasil, naik, wa=True))
-            kirim = [("teks", teks_al), ("foto", png, pesan.keterangan_foto(hasil))]
+            kirim = [("teks", teks_al)] + ([("foto", png, pesan.keterangan_foto(hasil))] if png else [])
 
         chat = os.environ.get(prov.get("chat_env", ""), "")
         panduan_lama = status.get(prov["id"], {}).get("panduan_sha", "")
@@ -244,7 +289,13 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
             # slot ditandai selesai hanya kalau semua pesan terkirim, supaya pemicu cadangan bisa mengulang
             "slot": slot if (otomatis and not coba and not gagal_kirim) else slot_lama,
         }
-        ringkasan.append(f"[{prov['id']}] {analisis.TINGKAT[hasil['tingkat']]}, {hasil['titik_prov_24j']} titik api, "
+        if not coba:
+            _tulis_json(status_path, status)  # simpan tiap provinsi, supaya yang sudah terkirim tidak dikirim ulang
+        frp = sorted(t.get("frp") or 0 for t in hasil["titik_peta"])
+        kelas = [sum(1 for v in frp if v >= b) for b, *_ in kartu.KELAS_API] + [0]
+        sebaran = (f"FRP median {frp[len(frp) // 2]:.1f} MW, kecil/sedang/besar = "
+                   + "/".join(str(kelas[i] - kelas[i + 1]) for i in range(len(kartu.KELAS_API)))) if frp else "tanpa titik"
+        ringkasan.append(f"[{prov['id']}] {analisis.TINGKAT[hasil['tingkat']]}, {hasil['titik_prov_24j']} titik panas ({sebaran}), "
                          f"mode {mode}, {'kirim ' + str(len(kirim)) + ' pesan' if kirim else 'tidak ada pesan'}"
                          f"{' (uji coba, tidak dikirim)' if coba and kirim else ''} -> {os.path.relpath(dasar, AKAR)}")
 

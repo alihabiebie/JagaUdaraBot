@@ -3,23 +3,26 @@
 Minggu, 11 Okt 2026, 06.00 WIB
 
 Status provinsi: *BAHAYA*
-Titik api 24 jam terakhir: 145 (naik dari 75)
+Titik panas 24 jam terakhir: 145 (naik dari 75)
+Angin membawa asap ke arah barat laut (±14 km/jam), menuju Palangka Raya.
 
-*Per kota (titik api dalam 50 km):*
+*Per kota (titik panas dalam 50 km):*
 🔴 *Palangka Raya*: BAHAYA
-   titik api 64 (naik dari 21); prakiraan asap tidak sehat, terpekat hari ini 07.00; stasiun Palangka Raya: AQI 214
+   titik panas 64 (naik dari 21); prakiraan asap tidak sehat, terpekat hari ini 07.00; stasiun Palangka Raya: AQI 214
 🟠 *Sampit*: SIAGA
-   titik api 26 (kemarin 23); prakiraan asap tidak sehat, terpekat hari ini 07.00
+   titik panas 26 (kemarin 23); prakiraan asap tidak sehat, terpekat hari ini 07.00
 🟠 *Kuala Kapuas*: SIAGA
-   titik api 24 (naik dari 6); prakiraan asap tidak sehat, terpekat hari ini 07.00
+   titik panas 24 (naik dari 6); prakiraan asap tidak sehat, terpekat hari ini 07.00
 🟡 *Pangkalan Bun*: WASPADA
-   titik api 7 (kemarin 9); prakiraan asap sedang, terpekat hari ini 07.00
+   titik panas 7 (kemarin 9); prakiraan asap sedang, terpekat hari ini 07.00
 🟡 *Buntok*: WASPADA
-   titik api 0 (sama); prakiraan asap sedang, terpekat hari ini 07.00
+   titik panas 0 (sama); prakiraan asap sedang, terpekat hari ini 07.00
 🟡 *Muara Teweh*: WASPADA
-   titik api 0 (sama); prakiraan asap sedang, terpekat hari ini 07.00
+   titik panas 0 (sama); prakiraan asap sedang, terpekat hari ini 07.00
 
 *Yang perlu dilakukan:*
 Semua orang sebisa mungkin di dalam rumah. Bayi, lansia, dan orang sakit di kamar bersih atau tempat berlindung. Segera ke puskesmas kalau sesak, bibir kebiruan, atau anak bernapas cepat.
 
-_Titik api dari satelit NASA (bisa terlewat kalau tertutup awan atau asap tebal). Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
+Panduan bergambar: https://claude.ai/artifact/V93jfCmqsGocTdrZWWCoKY
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
