@@ -1,6 +1,6 @@
 {
   "kalteng": {
-    "waktu": "2026-10-12T14:01:36.234016+00:00",
+    "waktu": "2026-10-12T17:01:36.596586+00:00",
     "tingkat": 3,
     "titik_prov_24j": 2568,
     "kota": {
@@ -8,14 +8,14 @@
       "Palangka Raya": 3,
       "Sampit": 3,
       "Buntok": 3,
-      "Pangkalan Bun": 2,
+      "Pangkalan Bun": 3,
       "Muara Teweh": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-12 21.00"
+    "slot": "2026-10-13 00.00"
   },
   "kalbar": {
-    "waktu": "2026-10-12T14:01:36.234016+00:00",
+    "waktu": "2026-10-12T17:01:36.596586+00:00",
     "tingkat": 3,
     "titik_prov_24j": 231,
     "kota": {
@@ -26,10 +26,10 @@
       "Putussibau": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-12 21.00"
+    "slot": "2026-10-13 00.00"
   },
   "kalsel": {
-    "waktu": "2026-10-12T14:01:36.234016+00:00",
+    "waktu": "2026-10-12T17:01:36.596586+00:00",
     "tingkat": 2,
     "titik_prov_24j": 617,
     "kota": {
@@ -40,24 +40,24 @@
       "Kotabaru": 2
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-12 21.00"
+    "slot": "2026-10-13 00.00"
   },
   "kaltim": {
-    "waktu": "2026-10-12T14:01:36.234016+00:00",
+    "waktu": "2026-10-12T17:01:36.596586+00:00",
     "tingkat": 2,
     "titik_prov_24j": 694,
     "kota": {
       "Tanah Grogot": 2,
-      "Samarinda": 1,
+      "Samarinda": 2,
       "Bontang": 1,
       "Sendawar": 1,
       "Balikpapan": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-12 21.00"
+    "slot": "2026-10-13 00.00"
   },
   "kaltara": {
-    "waktu": "2026-10-12T14:01:36.234016+00:00",
+    "waktu": "2026-10-12T17:01:36.596586+00:00",
     "tingkat": 2,
     "titik_prov_24j": 6,
     "kota": {
@@ -67,6 +67,6 @@
       "Nunukan": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-12 21.00"
+    "slot": "2026-10-13 00.00"
   }
 }
