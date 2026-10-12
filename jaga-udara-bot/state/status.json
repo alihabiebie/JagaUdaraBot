@@ -1,6 +1,6 @@
 {
   "kalteng": {
-    "waktu": "2026-10-12T02:01:25.092048+00:00",
+    "waktu": "2026-10-12T05:01:30.612897+00:00",
     "tingkat": 3,
     "titik_prov_24j": 2089,
     "kota": {
@@ -9,55 +9,55 @@
       "Pangkalan Bun": 3,
       "Buntok": 3,
       "Kuala Kapuas": 2,
-      "Muara Teweh": 2
+      "Muara Teweh": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-12 09.00"
+    "slot": "2026-10-12 12.00"
   },
   "kalbar": {
-    "waktu": "2026-10-12T02:01:25.092048+00:00",
+    "waktu": "2026-10-12T05:01:30.612897+00:00",
     "tingkat": 3,
     "titik_prov_24j": 214,
     "kota": {
-      "Pontianak": 3,
       "Sintang": 3,
       "Ketapang": 2,
+      "Pontianak": 2,
       "Singkawang": 1,
       "Putussibau": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-12 09.00"
+    "slot": "2026-10-12 12.00"
   },
   "kalsel": {
-    "waktu": "2026-10-12T02:01:25.092048+00:00",
-    "tingkat": 3,
+    "waktu": "2026-10-12T05:01:30.612897+00:00",
+    "tingkat": 2,
     "titik_prov_24j": 406,
     "kota": {
-      "Banjarbaru": 3,
+      "Banjarbaru": 2,
       "Banjarmasin": 2,
       "Barabai": 2,
       "Tanjung": 2,
       "Kotabaru": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-12 09.00"
+    "slot": "2026-10-12 12.00"
   },
   "kaltim": {
-    "waktu": "2026-10-12T02:01:25.092048+00:00",
+    "waktu": "2026-10-12T05:01:30.612897+00:00",
     "tingkat": 2,
     "titik_prov_24j": 623,
     "kota": {
       "Tanah Grogot": 2,
       "Samarinda": 2,
-      "Sendawar": 2,
       "Bontang": 1,
-      "Balikpapan": 1
+      "Balikpapan": 1,
+      "Sendawar": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-12 09.00"
+    "slot": "2026-10-12 12.00"
   },
   "kaltara": {
-    "waktu": "2026-10-12T02:01:25.092048+00:00",
+    "waktu": "2026-10-12T05:01:30.612897+00:00",
     "tingkat": 2,
     "titik_prov_24j": 0,
     "kota": {
@@ -67,6 +67,6 @@
       "Malinau": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-12 09.00"
+    "slot": "2026-10-12 12.00"
   }
 }
