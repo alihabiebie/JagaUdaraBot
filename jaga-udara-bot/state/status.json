@@ -1,6 +1,6 @@
 {
   "kalteng": {
-    "waktu": "2026-10-14T02:01:32.204005+00:00",
+    "waktu": "2026-10-14T05:01:30.774067+00:00",
     "tingkat": 3,
     "titik_prov_24j": 3137,
     "kota": {
@@ -12,10 +12,10 @@
       "Muara Teweh": 2
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-14 09.00"
+    "slot": "2026-10-14 12.00"
   },
   "kalbar": {
-    "waktu": "2026-10-14T02:01:32.204005+00:00",
+    "waktu": "2026-10-14T05:01:30.774067+00:00",
     "tingkat": 3,
     "titik_prov_24j": 285,
     "kota": {
@@ -26,26 +26,26 @@
       "Putussibau": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-14 09.00"
+    "slot": "2026-10-14 12.00"
   },
   "kalsel": {
-    "waktu": "2026-10-14T02:01:32.204005+00:00",
+    "waktu": "2026-10-14T05:01:30.774067+00:00",
     "tingkat": 3,
-    "titik_prov_24j": 503,
+    "titik_prov_24j": 494,
     "kota": {
-      "Banjarbaru": 3,
       "Barabai": 3,
       "Banjarmasin": 2,
+      "Banjarbaru": 2,
       "Tanjung": 2,
       "Kotabaru": 2
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-14 09.00"
+    "slot": "2026-10-14 12.00"
   },
   "kaltim": {
-    "waktu": "2026-10-14T02:01:32.204005+00:00",
+    "waktu": "2026-10-14T05:01:30.774067+00:00",
     "tingkat": 2,
-    "titik_prov_24j": 390,
+    "titik_prov_24j": 366,
     "kota": {
       "Tanah Grogot": 2,
       "Samarinda": 2,
@@ -54,19 +54,19 @@
       "Balikpapan": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-14 09.00"
+    "slot": "2026-10-14 12.00"
   },
   "kaltara": {
-    "waktu": "2026-10-14T02:01:32.204005+00:00",
+    "waktu": "2026-10-14T05:01:30.774067+00:00",
     "tingkat": 1,
-    "titik_prov_24j": 9,
+    "titik_prov_24j": 3,
     "kota": {
-      "Tanjung Selor": 1,
       "Tarakan": 1,
+      "Tanjung Selor": 1,
       "Nunukan": 1,
       "Malinau": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-14 09.00"
+    "slot": "2026-10-14 12.00"
   }
 }
