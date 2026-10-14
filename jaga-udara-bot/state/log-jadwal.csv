@@ -51,3 +51,4 @@ mulai_wib,pemicu,slot_wib,terlambat_menit,mode,pesan_terkirim
 2026-10-15 00.01,eksternal,2026-10-15 00.00,1,cek,2
 2026-10-15 01.42,jadwal,2026-10-15 00.00,102,"cek (dilewati, slot sudah dikirim)",0
 2026-10-15 03.01,eksternal,2026-10-15 03.00,1,cek,2
+2026-10-15 06.01,eksternal,2026-10-15 06.00,1,harian,10
