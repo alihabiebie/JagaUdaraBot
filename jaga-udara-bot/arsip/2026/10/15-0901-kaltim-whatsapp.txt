@@ -1,0 +1,23 @@
+🟠 *Kabar asap Kalimantan Timur*
+Kamis, 15 Okt 2026, 09.01 WIB
+
+Status provinsi: *SIAGA*
+Titik panas 24 jam terakhir: 721 (naik dari 390)
+Angin membawa asap ke arah barat laut (±8 km/jam).
+
+*Per kota (titik panas dalam 50 km):*
+🟠 *Tanah Grogot*: SIAGA
+   titik panas 86 (kemarin 99); prakiraan asap tidak sehat, terpekat besok 06.00
+🟠 *Sendawar*: SIAGA
+   titik panas 61 (naik dari 16); prakiraan asap tidak sehat, terpekat hari ini 18.00
+🟠 *Samarinda*: SIAGA
+   titik panas 27 (kemarin 25); prakiraan asap sedang, terpekat besok 00.00; stasiun Samarinda: AQI 165
+🟡 *Bontang*: WASPADA
+   titik panas 23 (naik dari 9); prakiraan asap sedang, terpekat hari ini 23.00
+🟡 *Balikpapan*: WASPADA
+   titik panas 13 (naik dari 6); prakiraan asap sedang, terpekat hari ini 19.00
+
+*Yang perlu dilakukan:*
+Kelompok rentan tetap di dalam rumah, di kamar yang ditutup rapat. Keluar rumah pakai masker N95 atau KN95. Kurangi kerja berat di luar.
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
