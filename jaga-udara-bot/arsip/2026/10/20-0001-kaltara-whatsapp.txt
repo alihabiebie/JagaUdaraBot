@@ -1,0 +1,21 @@
+🟠 *Kabar asap Kalimantan Utara*
+Selasa, 20 Okt 2026, 00.01 WIB
+
+Status provinsi: *SIAGA*
+Titik panas 24 jam terakhir: 26 (kemarin 22)
+Angin berubah-ubah arah (±5 km/jam): asap bisa menyebar ke segala arah.
+
+*Per kota (titik panas dalam 50 km):*
+🟠 *Tanjung Selor*: SIAGA
+   titik panas 7 (naik dari 1); prakiraan asap baik, terpekat hari ini 11.00; stasiun Tanjung Harapan: AQI 153
+🟡 *Malinau*: WASPADA
+   titik panas 11 (kemarin 8); prakiraan asap sedang, terpekat hari ini 18.00
+🟡 *Tarakan*: WASPADA
+   titik panas 3 (kemarin 5); prakiraan asap sedang, terpekat hari ini 13.00
+🔵 *Nunukan*: AMAN
+   titik panas 0 (sama); prakiraan asap baik, terpekat hari ini 14.00
+
+*Yang perlu dilakukan:*
+Kelompok rentan tetap di dalam rumah, di kamar yang ditutup rapat. Keluar rumah pakai masker N95 atau KN95. Kurangi kerja berat di luar.
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
