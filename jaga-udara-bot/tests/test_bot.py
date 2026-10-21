@@ -97,6 +97,84 @@ class TesGrid(unittest.TestCase):
         self.assertEqual(len(tidur), 1)  # 500 lokasi pertama langsung, sisanya setelah jeda 1 menit
 
 
+class TesRekapIndonesia(unittest.TestCase):
+    def test_rekap_per_provinsi(self):
+        import shutil
+        from bot import rekap_indonesia
+        with tempfile.TemporaryDirectory() as d:
+            fx = os.path.join(d, "fx")
+            shutil.copytree(os.path.join(os.path.dirname(__file__), "fixtures"), fx)
+            shutil.copy(os.path.join(os.path.dirname(__file__), "..", "data", "batas-provinsi.geojson"),
+                        os.path.join(fx, "batas_indonesia.geojson"))
+            env = {"FIXTURES": fx, "LAPORAN_DIR": d, "WAKTU_UJI": "2026-10-11T06:00:00+07:00"}
+            lama = {k: os.environ.get(k) for k in env}
+            os.environ.update(env)
+            try:
+                dasar = rekap_indonesia.jalankan(7)
+            finally:
+                for k, v in lama.items():
+                    os.environ.pop(k) if v is None else os.environ.__setitem__(k, v)
+            data = json.load(open(dasar + ".json"))
+            self.assertEqual(data["provinsi"][0]["provinsi"], "Kalimantan Tengah")
+            self.assertTrue(os.path.exists(dasar + ".png"))
+            self.assertIn("| 1 | Kalimantan Tengah | Kalimantan |", open(dasar + ".md").read())
+
+    def test_nama_inggris(self):
+        from bot.rekap_indonesia import indonesiakan, nama_pulau
+        self.assertEqual(indonesiakan("Central Kalimantan"), "Kalimantan Tengah")
+        self.assertEqual(indonesiakan("South Papua"), "Papua Selatan")
+        self.assertEqual(nama_pulau(indonesiakan("East Nusa Tenggara")), "Bali & Nusa Tenggara")
+        self.assertEqual(nama_pulau("Kepulauan Riau"), "Sumatra")
+
+
+class TesGangguanNasa(unittest.TestCase):
+    def test_satu_satelit_gagal_tetap_jalan(self):
+        asli = sumber._csv_firms
+
+        def palsu(sat, *a):
+            if sat == "VIIRS_SNPP_NRT":
+                raise sumber.GagalAmbil("HTTP Error 504: Gateway Time-out")
+            return "latitude,longitude,acq_date,acq_time,confidence,frp\n-2.2,113.9,2026-10-10,0600,n,5.0\n"
+        sumber._csv_firms = palsu
+        try:
+            titik = sumber.titik_api((110, -4, 116, 0), "kunci")
+        finally:
+            sumber._csv_firms = asli
+        self.assertEqual(len(titik), 2)  # dua satelit lain tetap terbaca
+
+    def test_semua_satelit_gagal(self):
+        asli = sumber._csv_firms
+        sumber._csv_firms = lambda *a: (_ for _ in ()).throw(sumber.GagalAmbil("timed out"))
+        try:
+            with self.assertRaises(sumber.GagalAmbil):
+                sumber.titik_api((110, -4, 116, 0), "kunci")
+        finally:
+            sumber._csv_firms = asli
+
+    def test_nasa_mati_diambil_sekali(self):
+        panggilan = []
+        asli = sumber.titik_api
+
+        def mati(*a, **k):
+            panggilan.append(1)
+            raise sumber.GagalAmbil("HTTP Error 504")
+        sumber.titik_api = mati
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                # FIXTURES (folder kosong) supaya log-jadwal.csv asli tidak ikut ditulis saat uji di GitHub
+                env = {"ARSIP_DIR": d, "STATE_DIR": d, "FIXTURES": d}
+                os.environ.update(env)
+                try:
+                    rc = main.jalankan("harian", coba=True)
+                finally:
+                    for k in env:
+                        os.environ.pop(k)
+        finally:
+            sumber.titik_api = asli
+        self.assertEqual(len(panggilan), 1)  # tidak diulang untuk tiap provinsi
+        self.assertEqual(rc, 1)  # semua provinsi gagal -> merah
+
+
 class TesPanduan(unittest.TestCase):
     def test_pesan_tanpa_tautan_artifact(self):
         hasil = {"nama": "Kalimantan Tengah", "waktu": datetime(2026, 10, 10, 23, tzinfo=timezone.utc), "tingkat": 0,

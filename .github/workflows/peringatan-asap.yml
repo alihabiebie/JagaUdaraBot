@@ -11,10 +11,10 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "otomatis = sesuai jam; harian = paksa kirim ringkasan; cek = hanya kalau status naik"
+        description: "otomatis = sesuai jam; harian = paksa kirim ringkasan; cek = hanya kalau status naik; rekap-indonesia = rekap titik panas seluruh Indonesia 7 hari (tidak mengirim pesan)"
         required: false
         type: choice
-        options: [otomatis, harian, cek]
+        options: [otomatis, harian, cek, rekap-indonesia]
         default: otomatis
       coba:
         description: "ya = uji coba tanpa mengirim pesan"
@@ -86,6 +86,10 @@ jobs:
           PROVINSI: ${{ inputs.provinsi }}
           PEMICU: ${{ inputs.pemicu }}
         run: |
+          if [ "$MODE" = "rekap-indonesia" ]; then
+            python -m bot.rekap_indonesia --hari 7
+            exit 0
+          fi
           ARGS=(--mode "$MODE")
           if [ "$COBA" = "ya" ]; then ARGS+=(--coba); fi
           if [ -n "$PROVINSI" ]; then
@@ -99,8 +103,8 @@ jobs:
         run: |
           git config user.name "jaga-udara-bot"
           git config user.email "jaga-udara-bot@users.noreply.github.com"
-          mkdir -p arsip state
-          git add arsip state
+          mkdir -p arsip state laporan
+          git add arsip state laporan
           git diff --cached --quiet || git commit -m "Arsip $(TZ=Asia/Jakarta date '+%Y-%m-%d %H.%M') WIB"
           # Ambil perubahan terbaru dulu (run lain atau suntingan Anda). Kalau bentrok di state/,
           # isi dari run ini yang dipakai (paling baru); log-jadwal.csv digabung (lihat .gitattributes).

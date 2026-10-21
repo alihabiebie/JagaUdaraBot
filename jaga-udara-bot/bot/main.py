@@ -157,12 +157,32 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
     # Grid angin diambil SEKALI untuk gabungan wilayah semua provinsi yang diproses
     # (peta antarprovinsi saling tumpang tindih), lalu dipotong per provinsi, supaya hemat
     # kuota gratis Open-Meteo.
-    kotak_peta = {}
+    kotak_peta, kotak_api = {}, {}
     for prov in cfg.get("provinsi", []):
         f = fitur.get(prov.get("kode_bps"))
         if prov.get("aktif") and f and (not hanya or prov["id"] in hanya) and not _sudah_dikirim(prov):
             kotak_peta[prov["id"]] = kartu.batas_peta(f["geometry"])
+            # titik panas diambil seluas peta di kartu (lebih lebar dari provinsi), supaya tidak terpotong garis lurus
+            b1, b2 = analisis.bbox_wilayah(f["geometry"]), kotak_peta[prov["id"]]
+            kotak_api[prov["id"]] = (min(b1[0], b2[0]), min(b1[1], b2[1]), max(b1[2], b2[2]), max(b1[3], b2[3]))
     grid = {}
+
+    # Titik panas NASA juga diambil SEKALI untuk gabungan semua provinsi (3 permintaan, bukan 3 per
+    # provinsi). Kalau server NASA bermasalah, semua provinsi tidak perlu menunggu batas waktu satu per satu.
+    api = {}
+
+    def _titik_api(prov_id):
+        if "data" not in api:
+            k = kotak_api.values()
+            bb = (min(b[0] for b in k), min(b[1] for b in k), max(b[2] for b in k), max(b[3] for b in k))
+            try:
+                api["data"] = sumber.titik_api(bb, map_key)
+            except sumber.GagalAmbil as e:
+                api["data"], api["galat"] = None, e
+        if api["data"] is None:
+            raise api["galat"]
+        x0, y0, x1, y1 = kotak_api[prov_id]
+        return [t for t in api["data"] if x0 <= t["lon"] <= x1 and y0 <= t["lat"] <= y1]
 
     def _grid(jenis):
         if jenis not in grid:
@@ -177,7 +197,8 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         return grid[jenis]
 
     ringkasan = []
-    galat = 0
+    galat = 0  # galat yang perlu diperiksa (gagal kirim Telegram, kartu gagal dibuat)
+    gagal_nasa = []  # provinsi yang dilewati karena server NASA bermasalah (akan dicoba lagi di putaran berikut)
     terkirim = 0
     for prov in cfg.get("provinsi", []):
         if not prov.get("aktif"):
@@ -194,13 +215,10 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
             continue
         geom = f["geometry"]
         try:
-            # ambil titik panas seluas peta di kartu (lebih lebar dari provinsi), supaya tidak terpotong garis lurus
-            b1, b2 = analisis.bbox_wilayah(geom), kartu.batas_peta(geom)
-            titik = sumber.titik_api((min(b1[0], b2[0]), min(b1[1], b2[1]), max(b1[2], b2[2]), max(b1[3], b2[3])),
-                                     map_key)
+            titik = _titik_api(prov["id"])
         except sumber.GagalAmbil as e:
             print(f"[{prov['id']}] GAGAL ambil titik panas: {e}")
-            galat += 1
+            gagal_nasa.append(prov["id"])
             continue
         prak, stas = {}, {}
         for k in prov["kota"]:
@@ -299,6 +317,7 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
                          f"mode {mode}, {'kirim ' + str(len(kirim)) + ' pesan' if kirim else 'tidak ada pesan'}"
                          f"{' (uji coba, tidak dikirim)' if coba and kirim else ''} -> {os.path.relpath(dasar, AKAR)}")
 
+    berhasil = len(ringkasan)
     semua_dilewati = bool(dilewati) and not ringkasan
     if dilewati:
         ringkasan.append(f"Slot {slot} WIB sudah dikirim sebelumnya untuk {', '.join(dilewati)}, dilewati supaya tidak dobel")
@@ -307,7 +326,13 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
     keterangan = mode + (" (coba)" if coba else "") + (" (dilewati, slot sudah dikirim)" if semua_dilewati else "")
     _catat_jadwal(mulai, keterangan, terkirim)
     print("\n".join(ringkasan) or "Tidak ada provinsi aktif.")
-    return 1 if galat else 0
+    if gagal_nasa:
+        # tanda kuning (bukan merah) di GitHub: gangguan server NASA, slot ini belum ditandai terkirim
+        # sehingga provinsi tersebut dicoba lagi oleh jadwal cadangan / putaran berikutnya
+        print(f"::warning::Server NASA FIRMS bermasalah, provinsi dilewati: {', '.join(gagal_nasa)}. "
+              "Akan dicoba lagi di putaran berikutnya.")
+    # merah hanya kalau ada yang perlu diperiksa, atau semua provinsi gagal karena NASA
+    return 1 if galat or (gagal_nasa and not berhasil) else 0
 
 
 def main():
