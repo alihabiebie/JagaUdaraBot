@@ -127,6 +127,54 @@ class TesRekapIndonesia(unittest.TestCase):
         self.assertEqual(nama_pulau("Kepulauan Riau"), "Sumatra")
 
 
+class TesGangguanNasa(unittest.TestCase):
+    def test_satu_satelit_gagal_tetap_jalan(self):
+        asli = sumber._csv_firms
+
+        def palsu(sat, *a):
+            if sat == "VIIRS_SNPP_NRT":
+                raise sumber.GagalAmbil("HTTP Error 504: Gateway Time-out")
+            return "latitude,longitude,acq_date,acq_time,confidence,frp\n-2.2,113.9,2026-10-10,0600,n,5.0\n"
+        sumber._csv_firms = palsu
+        try:
+            titik = sumber.titik_api((110, -4, 116, 0), "kunci")
+        finally:
+            sumber._csv_firms = asli
+        self.assertEqual(len(titik), 2)  # dua satelit lain tetap terbaca
+
+    def test_semua_satelit_gagal(self):
+        asli = sumber._csv_firms
+        sumber._csv_firms = lambda *a: (_ for _ in ()).throw(sumber.GagalAmbil("timed out"))
+        try:
+            with self.assertRaises(sumber.GagalAmbil):
+                sumber.titik_api((110, -4, 116, 0), "kunci")
+        finally:
+            sumber._csv_firms = asli
+
+    def test_nasa_mati_diambil_sekali(self):
+        panggilan = []
+        asli = sumber.titik_api
+
+        def mati(*a, **k):
+            panggilan.append(1)
+            raise sumber.GagalAmbil("HTTP Error 504")
+        sumber.titik_api = mati
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                # FIXTURES (folder kosong) supaya log-jadwal.csv asli tidak ikut ditulis saat uji di GitHub
+                env = {"ARSIP_DIR": d, "STATE_DIR": d, "FIXTURES": d}
+                os.environ.update(env)
+                try:
+                    rc = main.jalankan("harian", coba=True)
+                finally:
+                    for k in env:
+                        os.environ.pop(k)
+        finally:
+            sumber.titik_api = asli
+        self.assertEqual(len(panggilan), 1)  # tidak diulang untuk tiap provinsi
+        self.assertEqual(rc, 1)  # semua provinsi gagal -> merah
+
+
 class TesPanduan(unittest.TestCase):
     def test_pesan_tanpa_tautan_artifact(self):
         hasil = {"nama": "Kalimantan Tengah", "waktu": datetime(2026, 10, 10, 23, tzinfo=timezone.utc), "tingkat": 0,

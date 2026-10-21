@@ -14,7 +14,7 @@ import os
 import time
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 USER_AGENT = "JagaUdaraBot/0.1 (relawan; github.com)"
 FIRMS_SUMBER = ["VIIRS_SNPP_NRT", "VIIRS_NOAA20_NRT", "VIIRS_NOAA21_NRT"]
@@ -49,23 +49,38 @@ def _fixture(nama):
 
 
 # ---------------------------------------------------------------- FIRMS
+FIRMS_HARI_MAKS = 5  # batas API area FIRMS per permintaan
+
+
+def _potongan_hari(hari, hari_ini):
+    """[(tanggal_mulai atau None, jumlah_hari)]: lebih dari 5 hari dipecah memakai parameter tanggal FIRMS."""
+    if hari <= FIRMS_HARI_MAKS:
+        return [(None, hari)]
+    hasil, akhir = [], hari_ini
+    while hari > 0:
+        n = min(FIRMS_HARI_MAKS, hari)
+        mulai = akhir - timedelta(days=n - 1)
+        hasil.append((mulai.isoformat(), n))
+        akhir, hari = mulai - timedelta(days=1), hari - n
+    return hasil
+
+
 def titik_api(bbox, map_key, hari=3):
     """Semua deteksi titik panas VIIRS di dalam kotak bbox (barat, selatan, timur, utara).
 
     Mengembalikan list dict: lat, lon, waktu (datetime UTC), satelit, keyakinan, frp.
     """
-    hasil = []
+    if not map_key and not os.environ.get("FIXTURES"):
+        raise GagalAmbil("FIRMS_MAP_KEY belum diisi")
+    hasil, gagal = [], []
     for sumber in FIRMS_SUMBER:
-        teks = _fixture(f"firms_{sumber}.csv")
-        if teks is None:
-            if not map_key:
-                raise GagalAmbil("FIRMS_MAP_KEY belum diisi")
-            area = ",".join(f"{x:.3f}" for x in bbox)
-            url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{map_key}/{sumber}/{area}/{hari}"
-            teks = _get(url)
-        if not teks.lstrip().lower().startswith("latitude"):
-            # FIRMS mengembalikan pesan teks kalau kunci salah / kuota habis
-            raise GagalAmbil(f"FIRMS {sumber}: {teks.strip()[:120]}")
+        try:
+            teks = _csv_firms(sumber, bbox, map_key, hari)
+        except GagalAmbil as e:
+            # Server NASA kadang lambat/504. Ketiga satelit memotret daerah yang hampir sama,
+            # jadi kalau satu gagal, data dua satelit lain tetap dipakai.
+            gagal.append(str(e))
+            continue
         for row in csv.DictReader(io.StringIO(teks)):
             try:
                 jam = row["acq_time"].zfill(4)
@@ -80,7 +95,28 @@ def titik_api(bbox, map_key, hari=3):
                 })
             except (KeyError, ValueError):
                 continue
+    if len(gagal) == len(FIRMS_SUMBER):
+        raise GagalAmbil("semua satelit gagal: " + " | ".join(gagal))
+    for g in gagal:
+        print(f"Peringatan: satu sumber satelit dilewati, data dari satelit lain tetap dipakai ({g})")
     return hasil
+
+
+def _csv_firms(sumber, bbox, map_key, hari):
+    teks = _fixture(f"firms_{sumber}.csv")
+    if teks is None:
+        area = ",".join(f"{x:.3f}" for x in bbox)
+        bagian = []
+        for mulai, n in _potongan_hari(hari, datetime.now(timezone.utc).date()):
+            url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{map_key}/{sumber}/{area}/{n}"
+            # batas waktu lebih pendek supaya server NASA yang macet tidak menghabiskan 15 menit jatah run
+            bagian.append(_get(url + (f"/{mulai}" if mulai else ""), timeout=40, tries=2))
+        # gabungkan CSV: kepala kolom hanya dari bagian pertama
+        teks = bagian[0] + "".join("\n" + b.split("\n", 1)[1] if "\n" in b else "" for b in bagian[1:])
+    if not teks.lstrip().lower().startswith("latitude"):
+        # FIRMS mengembalikan pesan teks kalau kunci salah / kuota habis
+        raise GagalAmbil(f"FIRMS {sumber}: {teks.strip()[:120]}")
+    return teks
 
 
 # ---------------------------------------------------------------- Open-Meteo
