@@ -152,3 +152,4 @@ mulai_wib,pemicu,slot_wib,terlambat_menit,mode,pesan_terkirim
 2026-10-22 20.53,jadwal,2026-10-22 18.00,173,"harian (dilewati, slot sudah dikirim)",0
 2026-10-22 21.01,eksternal,2026-10-22 21.00,1,harian,10
 2026-10-23 00.01,eksternal,2026-10-23 00.00,1,cek,4
+2026-10-23 01.37,jadwal,2026-10-23 00.00,97,"cek (dilewati, slot sudah dikirim)",0
