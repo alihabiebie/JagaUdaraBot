@@ -1,6 +1,6 @@
 {
   "kalteng": {
-    "waktu": "2026-10-26T14:01:42.531516+00:00",
+    "waktu": "2026-10-26T17:01:39.644193+00:00",
     "tingkat": 3,
     "titik_prov_24j": 541,
     "kota": {
@@ -8,14 +8,14 @@
       "Pangkalan Bun": 3,
       "Kuala Kapuas": 3,
       "Sampit": 2,
-      "Buntok": 2,
+      "Buntok": 1,
       "Muara Teweh": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-26 21.00"
+    "slot": "2026-10-27 00.00"
   },
   "kalbar": {
-    "waktu": "2026-10-26T14:01:42.531516+00:00",
+    "waktu": "2026-10-26T17:01:39.644193+00:00",
     "tingkat": 3,
     "titik_prov_24j": 64,
     "kota": {
@@ -26,47 +26,47 @@
       "Putussibau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-26 21.00"
+    "slot": "2026-10-27 00.00"
   },
   "kalsel": {
-    "waktu": "2026-10-26T14:01:42.531516+00:00",
+    "waktu": "2026-10-26T17:01:39.644193+00:00",
     "tingkat": 3,
     "titik_prov_24j": 99,
     "kota": {
       "Banjarmasin": 3,
       "Barabai": 2,
-      "Kotabaru": 2,
       "Tanjung": 1,
+      "Kotabaru": 1,
       "Banjarbaru": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-26 21.00"
+    "slot": "2026-10-27 00.00"
   },
   "kaltim": {
-    "waktu": "2026-10-26T15:16:25.913678+00:00",
+    "waktu": "2026-10-26T17:01:39.644193+00:00",
     "tingkat": 2,
     "titik_prov_24j": 469,
     "kota": {
       "Tanah Grogot": 2,
+      "Samarinda": 2,
       "Bontang": 1,
-      "Samarinda": 1,
       "Sendawar": 1,
       "Balikpapan": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-26 21.00"
+    "slot": "2026-10-27 00.00"
   },
   "kaltara": {
-    "waktu": "2026-10-26T15:16:25.913678+00:00",
-    "tingkat": 1,
+    "waktu": "2026-10-26T17:01:39.644193+00:00",
+    "tingkat": 2,
     "titik_prov_24j": 13,
     "kota": {
-      "Tanjung Selor": 1,
+      "Tanjung Selor": 2,
       "Tarakan": 0,
       "Nunukan": 0,
       "Malinau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-26 21.00"
+    "slot": "2026-10-27 00.00"
   }
 }
