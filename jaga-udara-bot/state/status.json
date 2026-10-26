@@ -43,9 +43,9 @@
     "slot": "2026-10-26 21.00"
   },
   "kaltim": {
-    "waktu": "2026-10-26T11:01:51.200507+00:00",
+    "waktu": "2026-10-26T15:16:25.913678+00:00",
     "tingkat": 2,
-    "titik_prov_24j": 448,
+    "titik_prov_24j": 469,
     "kota": {
       "Tanah Grogot": 2,
       "Bontang": 1,
@@ -54,10 +54,10 @@
       "Balikpapan": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-26 18.00"
+    "slot": "2026-10-26 21.00"
   },
   "kaltara": {
-    "waktu": "2026-10-26T11:01:51.200507+00:00",
+    "waktu": "2026-10-26T15:16:25.913678+00:00",
     "tingkat": 1,
     "titik_prov_24j": 13,
     "kota": {
@@ -67,6 +67,6 @@
       "Malinau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-26 18.00"
+    "slot": "2026-10-26 21.00"
   }
 }
