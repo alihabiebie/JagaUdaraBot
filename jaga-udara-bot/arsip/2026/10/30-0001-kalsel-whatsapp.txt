@@ -1,0 +1,23 @@
+🟠 *Kabar asap Kalimantan Selatan*
+Jumat, 30 Okt 2026, 00.01 WIB
+
+Status provinsi: *SIAGA*
+Titik panas 24 jam terakhir: 101 (naik dari 14)
+Angin membawa asap ke arah barat laut (±9 km/jam).
+
+*Per kota (titik panas dalam 50 km):*
+🟠 *Barabai*: SIAGA
+   titik panas 7 (naik dari 1); prakiraan asap tidak sehat, terpekat hari ini 03.00
+🟠 *Tanjung*: SIAGA
+   titik panas 7 (naik dari 0); prakiraan asap tidak sehat, terpekat hari ini 03.00
+🟡 *Kotabaru*: WASPADA
+   titik panas 25 (naik dari 1); prakiraan asap sedang, terpekat hari ini 01.00; stasiun Kotabaru: AQI 84
+🟡 *Banjarmasin*: WASPADA
+   titik panas 12 (naik dari 0); prakiraan asap sedang, terpekat hari ini 06.00
+🟡 *Banjarbaru*: WASPADA
+   titik panas 12 (naik dari 0); prakiraan asap sedang, terpekat hari ini 04.00; stasiun Banjarbaru: AQI 139
+
+*Yang perlu dilakukan:*
+Kelompok rentan tetap di dalam rumah, di kamar yang ditutup rapat. Keluar rumah pakai masker N95 atau KN95. Kurangi kerja berat di luar.
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
