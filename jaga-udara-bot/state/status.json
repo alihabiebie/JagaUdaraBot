@@ -1,6 +1,6 @@
 {
   "kalteng": {
-    "waktu": "2026-10-30T11:01:40.349003+00:00",
+    "waktu": "2026-10-30T14:01:43.331450+00:00",
     "tingkat": 2,
     "titik_prov_24j": 470,
     "kota": {
@@ -12,24 +12,24 @@
       "Kuala Kapuas": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-30 18.00"
+    "slot": "2026-10-30 21.00"
   },
   "kalbar": {
-    "waktu": "2026-10-30T11:01:40.349003+00:00",
+    "waktu": "2026-10-30T14:01:43.331450+00:00",
     "tingkat": 1,
     "titik_prov_24j": 55,
     "kota": {
-      "Putussibau": 1,
+      "Pontianak": 1,
       "Sintang": 0,
-      "Pontianak": 0,
       "Singkawang": 0,
-      "Ketapang": 0
+      "Ketapang": 0,
+      "Putussibau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-30 18.00"
+    "slot": "2026-10-30 21.00"
   },
   "kalsel": {
-    "waktu": "2026-10-30T11:01:40.349003+00:00",
+    "waktu": "2026-10-30T14:01:43.331450+00:00",
     "tingkat": 1,
     "titik_prov_24j": 176,
     "kota": {
@@ -40,10 +40,10 @@
       "Kotabaru": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-30 18.00"
+    "slot": "2026-10-30 21.00"
   },
   "kaltim": {
-    "waktu": "2026-10-30T11:01:40.349003+00:00",
+    "waktu": "2026-10-30T14:01:43.331450+00:00",
     "tingkat": 2,
     "titik_prov_24j": 502,
     "kota": {
@@ -54,7 +54,7 @@
       "Samarinda": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-10-30 18.00"
+    "slot": "2026-10-30 21.00"
   },
   "kaltara": {
     "waktu": "2026-10-30T11:01:40.349003+00:00",
