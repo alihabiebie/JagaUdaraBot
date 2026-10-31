@@ -1,0 +1,23 @@
+🟡 *Kabar asap Kalimantan Selatan*
+Minggu, 1 Nov 2026, 00.01 WIB
+
+Status provinsi: *WASPADA*
+Titik panas 24 jam terakhir: 66 (turun dari 179)
+Angin membawa asap ke arah barat (±9 km/jam).
+
+*Per kota (titik panas dalam 50 km):*
+🟡 *Barabai*: WASPADA
+   titik panas 22 (turun dari 42); prakiraan asap sedang, terpekat hari ini 23.00
+🟡 *Tanjung*: WASPADA
+   titik panas 12 (turun dari 28); prakiraan asap sedang, terpekat hari ini 19.00
+🟡 *Banjarmasin*: WASPADA
+   titik panas 7 (turun dari 30); prakiraan asap sedang, terpekat hari ini 23.00
+🟡 *Banjarbaru*: WASPADA
+   titik panas 7 (turun dari 22); prakiraan asap sedang, terpekat hari ini 23.00; stasiun Banjarbaru: AQI 90
+🟡 *Kotabaru*: WASPADA
+   titik panas 1 (turun dari 17); prakiraan asap sedang, terpekat hari ini 23.00; stasiun Kotabaru: AQI 45
+
+*Yang perlu dilakukan:*
+Bayi, anak, lansia, ibu hamil, dan penderita asma atau sakit jantung: kurangi kegiatan lama di luar. Siapkan masker N95 atau KN95.
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
