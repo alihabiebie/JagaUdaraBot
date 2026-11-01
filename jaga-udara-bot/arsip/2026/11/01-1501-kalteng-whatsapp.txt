@@ -1,0 +1,25 @@
+🟠 *Kabar asap Kalimantan Tengah*
+Minggu, 1 Nov 2026, 15.01 WIB
+
+Status provinsi: *SIAGA*
+Titik panas 24 jam terakhir: 107 (turun dari 205)
+Angin membawa asap ke arah barat laut (±8 km/jam), menuju Palangka Raya.
+
+*Per kota (titik panas dalam 50 km):*
+🟠 *Buntok*: SIAGA
+   titik panas 37 (naik dari 20); prakiraan asap tidak sehat, terpekat hari ini 22.00
+🟠 *Palangka Raya*: SIAGA
+   titik panas 22 (turun dari 36); prakiraan asap tidak sehat, terpekat hari ini 17.00; stasiun Palangka Raya: AQI 151
+🟠 *Sampit*: SIAGA
+   titik panas 4 (turun dari 12); prakiraan asap tidak sehat, terpekat hari ini 17.00
+🟠 *Muara Teweh*: SIAGA
+   titik panas 1 (kemarin 1); prakiraan asap tidak sehat, terpekat besok 00.00
+🟡 *Pangkalan Bun*: WASPADA
+   titik panas 9 (turun dari 21); prakiraan asap sedang, terpekat hari ini 16.00; stasiun Pangkalanbun: AQI 123
+🟡 *Kuala Kapuas*: WASPADA
+   titik panas 0 (turun dari 8); prakiraan asap sedang, terpekat besok 05.00
+
+*Yang perlu dilakukan:*
+Kelompok rentan tetap di dalam rumah, di kamar yang ditutup rapat. Keluar rumah pakai masker N95 atau KN95. Kurangi kerja berat di luar.
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
