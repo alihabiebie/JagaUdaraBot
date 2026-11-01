@@ -1,0 +1,25 @@
+🔴 *Kabar asap Kalimantan Tengah*
+Minggu, 1 Nov 2026, 18.01 WIB
+
+Status provinsi: *BAHAYA*
+Titik panas 24 jam terakhir: 189 (kemarin 205)
+Angin berubah-ubah arah (±7 km/jam): asap bisa menyebar ke segala arah.
+
+*Per kota (titik panas dalam 50 km):*
+🔴 *Palangka Raya*: BAHAYA
+   titik panas 22 (turun dari 36); prakiraan asap tidak sehat, terpekat hari ini 18.00; stasiun Palangka Raya: AQI 204
+🟠 *Buntok*: SIAGA
+   titik panas 37 (naik dari 20); prakiraan asap tidak sehat, terpekat besok 01.00
+🟡 *Pangkalan Bun*: WASPADA
+   titik panas 15 (kemarin 21); prakiraan asap sedang, terpekat hari ini 18.00; stasiun Pangkalanbun: AQI 87
+🟡 *Sampit*: WASPADA
+   titik panas 4 (turun dari 12); prakiraan asap sedang, terpekat besok 17.00
+🟡 *Muara Teweh*: WASPADA
+   titik panas 1 (kemarin 1); prakiraan asap sedang, terpekat besok 00.00
+🟡 *Kuala Kapuas*: WASPADA
+   titik panas 0 (turun dari 8); prakiraan asap sedang, terpekat besok 05.00
+
+*Yang perlu dilakukan:*
+Semua orang sebisa mungkin di dalam rumah. Bayi, lansia, dan orang sakit di kamar bersih atau tempat berlindung. Segera ke puskesmas kalau sesak, bibir kebiruan, atau anak bernapas cepat.
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
