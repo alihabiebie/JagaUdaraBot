@@ -1,35 +1,35 @@
 {
   "kalteng": {
-    "waktu": "2026-11-05T20:01:52.824529+00:00",
+    "waktu": "2026-11-05T23:01:54.673145+00:00",
     "tingkat": 2,
     "titik_prov_24j": 479,
     "kota": {
       "Buntok": 2,
       "Palangka Raya": 2,
-      "Pangkalan Bun": 2,
       "Muara Teweh": 1,
       "Kuala Kapuas": 1,
-      "Sampit": 0
+      "Sampit": 1,
+      "Pangkalan Bun": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-06 03.00"
+    "slot": "2026-11-06 06.00"
   },
   "kalbar": {
-    "waktu": "2026-11-05T20:01:52.824529+00:00",
-    "tingkat": 0,
-    "titik_prov_24j": 8,
+    "waktu": "2026-11-05T23:01:54.673145+00:00",
+    "tingkat": 1,
+    "titik_prov_24j": 9,
     "kota": {
+      "Pontianak": 1,
       "Sintang": 0,
-      "Pontianak": 0,
       "Singkawang": 0,
       "Ketapang": 0,
       "Putussibau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-06 03.00"
+    "slot": "2026-11-06 06.00"
   },
   "kalsel": {
-    "waktu": "2026-11-05T20:01:52.824529+00:00",
+    "waktu": "2026-11-05T23:01:54.673145+00:00",
     "tingkat": 2,
     "titik_prov_24j": 105,
     "kota": {
@@ -40,10 +40,10 @@
       "Banjarbaru": 1
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-06 03.00"
+    "slot": "2026-11-06 06.00"
   },
   "kaltim": {
-    "waktu": "2026-11-05T20:01:52.824529+00:00",
+    "waktu": "2026-11-05T23:01:54.673145+00:00",
     "tingkat": 1,
     "titik_prov_24j": 185,
     "kota": {
@@ -54,10 +54,10 @@
       "Balikpapan": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-06 03.00"
+    "slot": "2026-11-06 06.00"
   },
   "kaltara": {
-    "waktu": "2026-11-05T20:01:52.824529+00:00",
+    "waktu": "2026-11-05T23:01:54.673145+00:00",
     "tingkat": 1,
     "titik_prov_24j": 33,
     "kota": {
@@ -67,6 +67,6 @@
       "Nunukan": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-06 03.00"
+    "slot": "2026-11-06 06.00"
   }
 }
