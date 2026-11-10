@@ -369,3 +369,4 @@ mulai_wib,pemicu,slot_wib,terlambat_menit,mode,pesan_terkirim
 2026-11-10 18.01,eksternal,2026-11-10 18.00,1,harian,10
 2026-11-10 21.01,eksternal,2026-11-10 21.00,1,harian,10
 2026-11-11 00.01,eksternal,2026-11-11 00.00,1,cek,0
+2026-11-11 01.42,jadwal,2026-11-11 00.00,102,"cek (dilewati, slot sudah dikirim)",0
