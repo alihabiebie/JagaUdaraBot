@@ -1,0 +1,23 @@
+🟡 *Kabar asap Kalimantan Timur*
+Kamis, 12 Nov 2026, 00.01 WIB
+
+Status provinsi: *WASPADA*
+Titik panas 24 jam terakhir: 140 (kemarin 131)
+Angin membawa asap ke arah barat (±7 km/jam), menuju Sendawar.
+
+*Per kota (titik panas dalam 50 km):*
+🟡 *Bontang*: WASPADA
+   titik panas 28 (kemarin 33); prakiraan asap baik, terpekat hari ini 03.00
+🟡 *Tanah Grogot*: WASPADA
+   titik panas 14 (naik dari 0); prakiraan asap sedang, terpekat hari ini 23.00
+🟡 *Sendawar*: WASPADA
+   titik panas 13 (kemarin 14); prakiraan asap sedang, terpekat hari ini 04.00
+🟡 *Samarinda*: WASPADA
+   titik panas 11 (kemarin 9); prakiraan asap baik, terpekat hari ini 00.00; stasiun Samarinda: AQI 92
+🔵 *Balikpapan*: AMAN
+   titik panas 3 (kemarin 5); prakiraan asap baik, terpekat hari ini 00.00
+
+*Yang perlu dilakukan:*
+Bayi, anak, lansia, ibu hamil, dan penderita asma atau sakit jantung: kurangi kegiatan lama di luar. Siapkan masker N95 atau KN95.
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
