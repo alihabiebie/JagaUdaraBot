@@ -1,0 +1,20 @@
+🔵 *Kabar asap Kalimantan Utara*
+Sabtu, 14 Nov 2026, 21.01 WIB
+
+Status provinsi: *AMAN*
+Titik panas 24 jam terakhir: 3 (naik dari 0)
+
+*Per kota (titik panas dalam 50 km):*
+🔵 *Malinau*: AMAN
+   titik panas 1 (kemarin 0); prakiraan asap baik, terpekat besok 20.00
+🔵 *Tanjung Selor*: AMAN
+   titik panas 0 (sama); prakiraan asap baik, terpekat besok 20.00; stasiun Tanjung Harapan: AQI 98
+🔵 *Tarakan*: AMAN
+   titik panas 0 (sama); prakiraan asap baik, terpekat besok 20.00
+🔵 *Nunukan*: AMAN
+   titik panas 0 (sama); prakiraan asap baik, terpekat besok 04.00
+
+*Yang perlu dilakukan:*
+Udara relatif aman. Tetap pantau kabar berikutnya.
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
