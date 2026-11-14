@@ -1,8 +1,8 @@
 {
   "kalteng": {
-    "waktu": "2026-11-14T20:01:49.458966+00:00",
+    "waktu": "2026-11-14T23:01:48.689760+00:00",
     "tingkat": 1,
-    "titik_prov_24j": 42,
+    "titik_prov_24j": 48,
     "kota": {
       "Muara Teweh": 1,
       "Buntok": 0,
@@ -12,10 +12,10 @@
       "Sampit": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-15 03.00"
+    "slot": "2026-11-15 06.00"
   },
   "kalbar": {
-    "waktu": "2026-11-14T20:01:49.458966+00:00",
+    "waktu": "2026-11-14T23:01:48.689760+00:00",
     "tingkat": 0,
     "titik_prov_24j": 10,
     "kota": {
@@ -26,26 +26,26 @@
       "Putussibau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-15 03.00"
+    "slot": "2026-11-15 06.00"
   },
   "kalsel": {
-    "waktu": "2026-11-14T20:01:49.458966+00:00",
+    "waktu": "2026-11-14T23:01:48.689760+00:00",
     "tingkat": 1,
-    "titik_prov_24j": 33,
+    "titik_prov_24j": 55,
     "kota": {
-      "Kotabaru": 1,
+      "Tanjung": 1,
       "Barabai": 1,
-      "Tanjung": 0,
-      "Banjarmasin": 0,
-      "Banjarbaru": 0
+      "Kotabaru": 1,
+      "Banjarbaru": 1,
+      "Banjarmasin": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-15 03.00"
+    "slot": "2026-11-15 06.00"
   },
   "kaltim": {
-    "waktu": "2026-11-14T20:01:49.458966+00:00",
+    "waktu": "2026-11-14T23:01:48.689760+00:00",
     "tingkat": 1,
-    "titik_prov_24j": 178,
+    "titik_prov_24j": 271,
     "kota": {
       "Sendawar": 1,
       "Bontang": 1,
@@ -54,10 +54,10 @@
       "Balikpapan": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-15 03.00"
+    "slot": "2026-11-15 06.00"
   },
   "kaltara": {
-    "waktu": "2026-11-14T20:01:49.458966+00:00",
+    "waktu": "2026-11-14T23:01:48.689760+00:00",
     "tingkat": 0,
     "titik_prov_24j": 3,
     "kota": {
@@ -67,6 +67,6 @@
       "Nunukan": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-15 03.00"
+    "slot": "2026-11-15 06.00"
   }
 }
