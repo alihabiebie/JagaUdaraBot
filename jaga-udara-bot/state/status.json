@@ -1,6 +1,6 @@
 {
   "kalteng": {
-    "waktu": "2026-11-16T11:01:51.701997+00:00",
+    "waktu": "2026-11-16T14:01:49.507268+00:00",
     "tingkat": 0,
     "titik_prov_24j": 0,
     "kota": {
@@ -12,10 +12,10 @@
       "Muara Teweh": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-16 18.00"
+    "slot": "2026-11-16 21.00"
   },
   "kalbar": {
-    "waktu": "2026-11-16T11:01:51.701997+00:00",
+    "waktu": "2026-11-16T14:01:49.507268+00:00",
     "tingkat": 0,
     "titik_prov_24j": 0,
     "kota": {
@@ -26,7 +26,7 @@
       "Putussibau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-16 18.00"
+    "slot": "2026-11-16 21.00"
   },
   "kalsel": {
     "waktu": "2026-11-16T11:01:51.701997+00:00",
