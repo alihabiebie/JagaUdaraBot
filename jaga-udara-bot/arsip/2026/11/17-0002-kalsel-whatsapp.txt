@@ -1,0 +1,22 @@
+🟡 *Kabar asap Kalimantan Selatan*
+Selasa, 17 Nov 2026, 00.02 WIB
+
+Status provinsi: *WASPADA*
+Titik panas 24 jam terakhir: 6 (turun dari 31)
+
+*Per kota (titik panas dalam 50 km):*
+🟡 *Barabai*: WASPADA
+   titik panas 0 (turun dari 8); prakiraan asap sedang, terpekat hari ini 00.00
+🔵 *Kotabaru*: AMAN
+   titik panas 2 (kemarin 2); prakiraan asap baik, terpekat hari ini 00.00; stasiun Kotabaru: AQI 38
+🔵 *Banjarmasin*: AMAN
+   titik panas 0 (turun dari 3); prakiraan asap baik, terpekat hari ini 18.00
+🔵 *Banjarbaru*: AMAN
+   titik panas 0 (turun dari 3); prakiraan asap baik, terpekat hari ini 19.00; stasiun Banjarbaru: AQI 68
+🔵 *Tanjung*: AMAN
+   titik panas 0 (turun dari 12); prakiraan asap baik, terpekat hari ini 00.00
+
+*Yang perlu dilakukan:*
+Bayi, anak, lansia, ibu hamil, dan penderita asma atau sakit jantung: kurangi kegiatan lama di luar. Siapkan masker N95 atau KN95.
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
