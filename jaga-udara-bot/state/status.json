@@ -1,6 +1,6 @@
 {
   "kalteng": {
-    "waktu": "2026-11-23T02:02:05.279087+00:00",
+    "waktu": "2026-11-23T05:01:50.250833+00:00",
     "tingkat": 0,
     "titik_prov_24j": 35,
     "kota": {
@@ -12,24 +12,24 @@
       "Buntok": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-23 09.00"
+    "slot": "2026-11-23 12.00"
   },
   "kalbar": {
-    "waktu": "2026-11-23T02:02:05.279087+00:00",
-    "tingkat": 1,
+    "waktu": "2026-11-23T05:01:50.250833+00:00",
+    "tingkat": 0,
     "titik_prov_24j": 25,
     "kota": {
-      "Pontianak": 1,
+      "Pontianak": 0,
       "Singkawang": 0,
       "Ketapang": 0,
       "Sintang": 0,
       "Putussibau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-23 09.00"
+    "slot": "2026-11-23 12.00"
   },
   "kalsel": {
-    "waktu": "2026-11-23T02:02:05.279087+00:00",
+    "waktu": "2026-11-23T05:01:50.250833+00:00",
     "tingkat": 1,
     "titik_prov_24j": 40,
     "kota": {
@@ -40,12 +40,12 @@
       "Banjarmasin": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-23 09.00"
+    "slot": "2026-11-23 12.00"
   },
   "kaltim": {
-    "waktu": "2026-11-23T02:02:05.279087+00:00",
+    "waktu": "2026-11-23T05:01:50.250833+00:00",
     "tingkat": 1,
-    "titik_prov_24j": 204,
+    "titik_prov_24j": 196,
     "kota": {
       "Tanah Grogot": 1,
       "Bontang": 1,
@@ -54,19 +54,19 @@
       "Balikpapan": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-23 09.00"
+    "slot": "2026-11-23 12.00"
   },
   "kaltara": {
-    "waktu": "2026-11-23T02:02:05.279087+00:00",
+    "waktu": "2026-11-23T05:01:50.250833+00:00",
     "tingkat": 0,
-    "titik_prov_24j": 5,
+    "titik_prov_24j": 4,
     "kota": {
-      "Tanjung Selor": 0,
       "Tarakan": 0,
       "Nunukan": 0,
+      "Tanjung Selor": 0,
       "Malinau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-23 09.00"
+    "slot": "2026-11-23 12.00"
   }
 }
