@@ -1,6 +1,6 @@
 {
   "kalteng": {
-    "waktu": "2026-11-23T14:01:57.129878+00:00",
+    "waktu": "2026-11-23T17:01:59.642126+00:00",
     "tingkat": 0,
     "titik_prov_24j": 21,
     "kota": {
@@ -12,10 +12,10 @@
       "Pangkalan Bun": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-23 21.00"
+    "slot": "2026-11-24 00.00"
   },
   "kalbar": {
-    "waktu": "2026-11-23T14:01:57.129878+00:00",
+    "waktu": "2026-11-23T17:01:59.642126+00:00",
     "tingkat": 1,
     "titik_prov_24j": 7,
     "kota": {
@@ -26,10 +26,10 @@
       "Putussibau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-23 21.00"
+    "slot": "2026-11-24 00.00"
   },
   "kalsel": {
-    "waktu": "2026-11-23T14:01:57.129878+00:00",
+    "waktu": "2026-11-23T17:01:59.642126+00:00",
     "tingkat": 1,
     "titik_prov_24j": 67,
     "kota": {
@@ -40,12 +40,12 @@
       "Banjarbaru": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-23 21.00"
+    "slot": "2026-11-24 00.00"
   },
   "kaltim": {
-    "waktu": "2026-11-23T14:01:57.129878+00:00",
+    "waktu": "2026-11-23T17:01:59.642126+00:00",
     "tingkat": 1,
-    "titik_prov_24j": 169,
+    "titik_prov_24j": 168,
     "kota": {
       "Tanah Grogot": 1,
       "Bontang": 1,
@@ -54,19 +54,19 @@
       "Balikpapan": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-23 21.00"
+    "slot": "2026-11-24 00.00"
   },
   "kaltara": {
-    "waktu": "2026-11-23T14:01:57.129878+00:00",
-    "tingkat": 0,
+    "waktu": "2026-11-23T17:01:59.642126+00:00",
+    "tingkat": 1,
     "titik_prov_24j": 2,
     "kota": {
+      "Tanjung Selor": 1,
       "Tarakan": 0,
-      "Tanjung Selor": 0,
       "Nunukan": 0,
       "Malinau": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-23 21.00"
+    "slot": "2026-11-24 00.00"
   }
 }
