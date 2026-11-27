@@ -1,18 +1,18 @@
 {
   "kalteng": {
-    "waktu": "2026-11-27T05:01:57.757786+00:00",
+    "waktu": "2026-11-27T08:01:59.744324+00:00",
     "tingkat": 1,
-    "titik_prov_24j": 15,
+    "titik_prov_24j": 2,
     "kota": {
       "Kuala Kapuas": 1,
-      "Pangkalan Bun": 0,
-      "Buntok": 0,
       "Palangka Raya": 0,
       "Sampit": 0,
+      "Pangkalan Bun": 0,
+      "Buntok": 0,
       "Muara Teweh": 0
     },
     "panduan_sha": "3ad27ae0ba08fb49ffea293c77a20a9c3f1b3a71cf930ec93c9be9b687e8f44f",
-    "slot": "2026-11-27 12.00"
+    "slot": "2026-11-27 15.00"
   },
   "kalbar": {
     "waktu": "2026-11-27T05:01:57.757786+00:00",
