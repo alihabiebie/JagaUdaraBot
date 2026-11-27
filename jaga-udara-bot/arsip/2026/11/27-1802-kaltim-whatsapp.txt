@@ -1,0 +1,23 @@
+🔵 *Kabar asap Kalimantan Timur*
+Jumat, 27 Nov 2026, 18.02 WIB
+
+Status provinsi: *AMAN*
+Titik panas 24 jam terakhir: 21 (turun dari 46)
+Angin membawa asap ke arah barat daya (±6 km/jam).
+
+*Per kota (titik panas dalam 50 km):*
+🔵 *Tanah Grogot*: AMAN
+   titik panas 9 (kemarin 11); prakiraan asap baik, terpekat hari ini 19.00
+🔵 *Samarinda*: AMAN
+   titik panas 4 (kemarin 4); prakiraan asap baik, terpekat hari ini 20.00; stasiun Samarinda: AQI 20
+🔵 *Balikpapan*: AMAN
+   titik panas 4 (naik dari 0); prakiraan asap baik, terpekat hari ini 18.00
+🔵 *Bontang*: AMAN
+   titik panas 2 (turun dari 6); prakiraan asap baik, terpekat besok 04.00
+🔵 *Sendawar*: AMAN
+   titik panas 0 (turun dari 4); prakiraan asap baik, terpekat besok 04.00
+
+*Yang perlu dilakukan:*
+Udara relatif aman. Tetap pantau kabar berikutnya.
+
+_Titik panas = panas tinggi yang terdeteksi satelit NASA, belum tentu kebakaran; api bisa terlewat kalau tertutup awan atau asap tebal. Prakiraan asap dari model CAMS dan bisa lebih rendah dari kenyataan saat kebakaran gambut. Inisiatif warga Jaga Udara, bukan kanal resmi pemerintah._
