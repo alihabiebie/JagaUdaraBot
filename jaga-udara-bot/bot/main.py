@@ -290,13 +290,17 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
                         else:
                             telegram.kirim_teks(tg_token, chat, item[1])
                         terkirim += 1
-                except telegram.GagalKirim as e:
-                    print(f"[{prov['id']}] GAGAL kirim: {e}")
+                except Exception as e:  # GagalKirim atau galat tak terduga: provinsi lain tetap diproses
+                    print(f"[{prov['id']}] GAGAL kirim: {e!r}")
                     galat += 1
                     gagal_kirim = True
         # PDF panduan ikut setiap pesan; tanpa pesan pun tetap dikirim kalau isinya baru
         if panduan_pdf and not coba and tg_token and chat:
-            panduan_sha = _kirim_panduan(tg_token, chat, panduan_pdf, panduan_lama, prov, selalu=bool(kirim))
+            try:
+                panduan_sha = _kirim_panduan(tg_token, chat, panduan_pdf, panduan_lama, prov, selalu=bool(kirim))
+            except Exception as e:
+                print(f"[{prov['id']}] GAGAL kirim PDF panduan: {e!r}")
+                galat += 1
 
         status[prov["id"]] = {
             "waktu": sekarang.isoformat(),

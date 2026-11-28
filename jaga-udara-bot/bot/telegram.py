@@ -2,6 +2,7 @@
 import json
 import mimetypes
 import os
+import time
 import urllib.error
 import urllib.request
 import uuid
@@ -11,16 +12,43 @@ class GagalKirim(Exception):
     pass
 
 
-def _post(url, data, headers):
-    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-    try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            hasil = json.loads(r.read().decode())
-    except urllib.error.HTTPError as e:
-        raise GagalKirim(f"Telegram {e.code}: {e.read().decode(errors='replace')[:200]}")
-    if not hasil.get("ok"):
-        raise GagalKirim(f"Telegram: {hasil}")
-    return hasil
+def _post(url, data, headers, tries=3):
+    """Kirim ke Bot API. Semua jenis gagal (HTTP, koneksi putus, batas waktu) dijadikan GagalKirim.
+
+    Gangguan sementara (koneksi putus, server 5xx, 429 terlalu sering) dicoba ulang dengan jeda,
+    supaya satu gangguan jaringan tidak menghentikan seluruh putaran.
+    """
+    last = None
+    for i in range(tries):
+        req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                hasil = json.loads(r.read().decode())
+        except urllib.error.HTTPError as e:
+            isi = e.read().decode(errors="replace")[:200]
+            last = GagalKirim(f"Telegram {e.code}: {isi}")
+            if e.code == 429:
+                # Telegram memberi tahu berapa detik harus menunggu
+                try:
+                    tunggu = int(json.loads(isi).get("parameters", {}).get("retry_after", 5))
+                except (ValueError, AttributeError):
+                    tunggu = 5
+                time.sleep(min(tunggu, 60) + 1)
+                continue
+            if e.code >= 500:
+                time.sleep(5 * (i + 1))
+                continue
+            raise last  # 400/401/403 dst.: salah isi/izin, tidak ada gunanya diulang
+        except (OSError, ValueError) as e:
+            # URLError, batas waktu, koneksi diputus server (RemoteDisconnected/ConnectionReset),
+            # atau balasan yang bukan JSON
+            last = GagalKirim(f"Telegram tidak terjangkau: {e!r}")
+            time.sleep(5 * (i + 1))
+            continue
+        if not hasil.get("ok"):
+            raise GagalKirim(f"Telegram: {hasil}")
+        return hasil
+    raise last
 
 
 def kirim_teks(token, chat_id, teks):
