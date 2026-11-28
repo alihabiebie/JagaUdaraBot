@@ -267,6 +267,44 @@ class TesPencegahDobel(unittest.TestCase):
         self.assertEqual(len(self.kirim), 6)
 
 
+class TesTelegramPutus(unittest.TestCase):
+    """Koneksi ke Telegram yang putus tidak boleh menghentikan seluruh putaran (galat Nov 2026)."""
+
+    def setUp(self):
+        self.asli = (telegram.urllib.request.urlopen, telegram.time.sleep)
+        telegram.time.sleep = lambda s: None
+
+    def tearDown(self):
+        telegram.urllib.request.urlopen, telegram.time.sleep = self.asli
+
+    def test_koneksi_putus_jadi_gagalkirim(self):
+        def putus(*a, **k):
+            raise ConnectionResetError("Connection reset by peer")
+        telegram.urllib.request.urlopen = putus
+        with self.assertRaises(telegram.GagalKirim):
+            telegram.kirim_teks("x", "@uji", "halo")
+
+    def test_putus_sekali_lalu_berhasil(self):
+        import io
+        n = []
+
+        class Balasan(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        def kadang(*a, **k):
+            n.append(1)
+            if len(n) == 1:
+                raise TimeoutError("timed out")
+            return Balasan(b'{"ok": true, "result": {"message_id": 7}}')
+        telegram.urllib.request.urlopen = kadang
+        telegram.kirim_teks("x", "@uji", "halo")
+        self.assertEqual(len(n), 2)
+
+
 class TesUjung(unittest.TestCase):
     def test_jalan_dengan_data_contoh(self):
         # arsip uji ditulis ke folder sementara, supaya tidak tercampur dengan arsip asli
