@@ -298,11 +298,41 @@ class TesTelegramPutus(unittest.TestCase):
         def kadang(*a, **k):
             n.append(1)
             if len(n) == 1:
-                raise TimeoutError("timed out")
+                # seperti galat Nov 2026: koneksi direset saat jabat tangan TLS (sebelum pesan terkirim)
+                raise telegram.urllib.error.URLError(ConnectionResetError(104, "Connection reset by peer"))
             return Balasan(b'{"ok": true, "result": {"message_id": 7}}')
         telegram.urllib.request.urlopen = kadang
         telegram.kirim_teks("x", "@uji", "halo")
         self.assertEqual(len(n), 2)
+
+    def test_putus_setelah_terkirim_tidak_diulang(self):
+        # batas waktu menunggu jawaban: pesan mungkin sudah tampil, jangan dikirim dua kali
+        n = []
+
+        def macet(*a, **k):
+            n.append(1)
+            raise TimeoutError("timed out")
+        telegram.urllib.request.urlopen = macet
+        with self.assertRaises(telegram.GagalKirim) as cm:
+            telegram.kirim_teks("x", "@uji", "halo")
+        self.assertEqual(len(n), 1)
+        self.assertTrue(cm.exception.jaringan)
+
+
+class TesTelegramTakTerjangkau(TesPencegahDobel):
+    """Kalau Telegram tidak terjangkau, PDF tidak ikut menunggu, slot tidak ditandai, dan peringatan diulang."""
+
+    def test_putus_ditunda_ke_putaran_berikutnya(self):
+        def putus(*a):
+            self.kirim.append("foto-gagal")
+            raise telegram.GagalKirim("Telegram tidak terjangkau", jaringan=True)
+        telegram.kirim_foto = putus
+        rc = main.jalankan("otomatis", hanya={"kalteng"})
+        self.assertEqual(self.kirim, ["foto-gagal"])  # teks dan PDF tidak dicoba lagi
+        self.assertEqual(rc, 1)
+        telegram.kirim_foto = lambda *a: self.kirim.append("foto")
+        main.jalankan("otomatis", hanya={"kalteng"})  # pemicu cadangan di slot yang sama mengirim ulang
+        self.assertEqual(self.kirim, ["foto-gagal", "foto", "teks", "pdf"])
 
 
 class TesUjung(unittest.TestCase):

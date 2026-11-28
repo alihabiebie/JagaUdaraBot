@@ -113,6 +113,8 @@ def _kirim_panduan(token, chat, path, sha_lama, prov, selalu=False):
         mid = telegram.kirim_dokumen(token, chat, path, f"📄 Panduan keluarga menghadapi kabut asap ({prov['nama']}). "
                                      "Simpan dan teruskan ke keluarga. Bisa dicetak untuk ditempel atau dibacakan.")
     except telegram.GagalKirim as e:
+        if e.jaringan:
+            raise  # Telegram tidak terjangkau: biar jalankan() menunda pengiriman provinsi berikutnya
         print(f"[{prov['id']}] GAGAL kirim PDF panduan: {e}")
         return sha_lama
     print(f"[{prov['id']}] PDF panduan dikirim ke kanal")
@@ -200,6 +202,9 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
     galat = 0  # galat yang perlu diperiksa (gagal kirim Telegram, kartu gagal dibuat)
     gagal_nasa = []  # provinsi yang dilewati karena server NASA bermasalah (akan dicoba lagi di putaran berikut)
     terkirim = 0
+    # Kalau Telegram sedang tidak terjangkau, provinsi berikutnya tidak ikut menunggu batas waktu;
+    # slot mereka tidak ditandai terkirim, jadi dikirim ulang oleh putaran berikutnya.
+    telegram_putus = []
     for prov in cfg.get("provinsi", []):
         if not prov.get("aktif"):
             continue
@@ -279,7 +284,10 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
         panduan_lama = status.get(prov["id"], {}).get("panduan_sha", "")
         panduan_sha = panduan_lama
         gagal_kirim = False
-        if kirim and not coba:
+        if kirim and not coba and telegram_putus:
+            print(f"[{prov['id']}] Telegram sedang tidak terjangkau, pesan ditunda ke putaran berikutnya")
+            gagal_kirim = True
+        elif kirim and not coba:
             if not (tg_token and chat):
                 print(f"[{prov['id']}] TELEGRAM_BOT_TOKEN atau {prov.get('chat_env')} belum diisi, pesan tidak dikirim")
             else:
@@ -294,19 +302,25 @@ def jalankan(mode="otomatis", coba=False, sekarang=None, hanya=None):
                     print(f"[{prov['id']}] GAGAL kirim: {e!r}")
                     galat += 1
                     gagal_kirim = True
+                    if getattr(e, "jaringan", False):
+                        telegram_putus.append(prov["id"])
         # PDF panduan ikut setiap pesan; tanpa pesan pun tetap dikirim kalau isinya baru
-        if panduan_pdf and not coba and tg_token and chat:
+        if panduan_pdf and not coba and tg_token and chat and not telegram_putus:
             try:
                 panduan_sha = _kirim_panduan(tg_token, chat, panduan_pdf, panduan_lama, prov, selalu=bool(kirim))
             except Exception as e:
                 print(f"[{prov['id']}] GAGAL kirim PDF panduan: {e!r}")
                 galat += 1
+                if getattr(e, "jaringan", False):
+                    telegram_putus.append(prov["id"])
 
         status[prov["id"]] = {
             "waktu": sekarang.isoformat(),
             "tingkat": hasil["tingkat"],
             "titik_prov_24j": hasil["titik_prov_24j"],
-            "kota": {k["nama"]: k["tingkat"] for k in hasil["kota"]},
+            # kalau pengiriman gagal, status kota lama dipertahankan supaya peringatan yang belum
+            # sampai dikirim ulang di putaran berikutnya
+            "kota": lama if gagal_kirim else {k["nama"]: k["tingkat"] for k in hasil["kota"]},
             "panduan_sha": panduan_sha,
             # slot ditandai selesai hanya kalau semua pesan terkirim, supaya pemicu cadangan bisa mengulang
             "slot": slot if (otomatis and not coba and not gagal_kirim) else slot_lama,
